@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.savemate.controller.RegisterController"
+            stylesheets="@../css/app.css">
+
+    <children>
+        <VBox alignment="CENTER" spacing="12"
+              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+              AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+              style="-fx-padding: 30;">
+
+            <ImageView fitWidth="90" fitHeight="90" smooth="true" preserveRatio="true">
+                <image>
+                    <Image url="@../img/user_icon_home_256x256.png" />
+                </image>
+            </ImageView>
+
+            <HBox spacing="8" alignment="CENTER_LEFT" maxWidth="250" styleClass="input-container">
+                <TextField fx:id="nombreField" promptText="Nombre y apellidos" />
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT" maxWidth="250" styleClass="input-container">
+                <TextField fx:id="emailField" promptText="Email" />
+                <ImageView fx:id="emailIcon" fitWidth="16" fitHeight="16" visible="false" />
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT" maxWidth="250" styleClass="input-container">
+                <PasswordField fx:id="passwordField" promptText="Contraseña" />
+                <ImageView fx:id="passwordIcon" fitWidth="16" fitHeight="16" visible="false" />
+            </HBox>
+
+            <HBox spacing="8" alignment="CENTER_LEFT" maxWidth="250" styleClass="input-container">
+                <PasswordField fx:id="confirmPasswordField" promptText="Repetir contraseña" />
+                <ImageView fx:id="confirmIcon" fitWidth="16" fitHeight="16" visible="false" />
+            </HBox>
+
+            <StackPane fx:id="animatedRegisterButtonContainer" maxWidth="250" />
+            <Hyperlink text="¿Ya tienes cuenta? Inicia Sesión" onAction="#goToLogin" />
+        </VBox>
+    </children>
+</AnchorPane>

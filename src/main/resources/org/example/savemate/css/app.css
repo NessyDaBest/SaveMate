@@ -1,0 +1,63 @@
+/* Estilos generales para SaveMate */
+
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #f5f7fa;
+}
+
+/* Botones */
+.button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px;
+    
+}
+.button :hover{
+-fx-background-color: #3f8f41;
+}
+
+.animated-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 16;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.input-container .text-field,
+.input-container .password-field {
+    -fx-pref-width: 230px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1px;
+    -fx-padding: 6px;
+}
+
+/* Campos de texto */
+.text-field, .password-field {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1px;
+    -fx-padding: 6px;
+}
+
+/* Enlaces */
+.hyperlink {
+    -fx-text-fill: #1a73e8;
+    -fx-underline: true;
+    -fx-font-size: 12px;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #1a73e8;
+}
+
+/* Labels principales */
+.label {
+    -fx-font-size: 14px;
+}

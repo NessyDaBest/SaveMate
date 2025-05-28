@@ -35,6 +35,17 @@ public class LoginController {
             passwordField.setText(saved[1]);
             rememberCheckBox.setSelected(true);
         }
+        //Detectar Enter
+        emailField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
     }
 
     @FXML

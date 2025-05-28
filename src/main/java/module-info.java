@@ -16,6 +16,9 @@ module org.example.savemate {
     //Encriptador
     requires jbcrypt;
 
+    //JFoenix
+    requires com.jfoenix;
+
     // Permitir acceso desde FXML
     opens org.example.savemate to javafx.fxml;
     opens org.example.savemate.controller to javafx.fxml;

@@ -39,6 +39,29 @@ public class RegisterController {
 
         // Listeners de validación
         setupValidation();
+
+        //Detectar Enter en cualquier campo
+        nombreField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
+        emailField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
+        passwordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
+        confirmPasswordField.setOnKeyPressed(event -> {
+            if (event.getCode().toString().equals("ENTER")) {
+                innerButton.fire();
+            }
+        });
+
     }
     private void setupValidation() {
         emailField.textProperty().addListener((obs, oldVal, newVal) -> validateEmail(newVal));

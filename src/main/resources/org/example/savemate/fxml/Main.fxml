@@ -1,31 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.MainController">
-    <top>
-        <ToolBar>
-            <Label text="SaveMate" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.MainController">
+
+    <!-- Drawer Lateral -->
+    <JFXDrawer fx:id="drawer" defaultDrawerSize="220" overLayVisible="true" resizableOnDrag="true" />
+
+    <!-- Contenedor Principal -->
+    <VBox>
+
+        <!-- Barra Superior -->
+        <ToolBar fx:id="topBar" styleClass="toolbar">
+            <JFXHamburger fx:id="hamburger" />
+
+            <!-- Título de cuenta bancaria -->
+            <Label fx:id="tituloCuenta" text="Cuenta Ahorros" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+
             <Pane HBox.hgrow="ALWAYS" />
-            <Button text="👤" onAction="#handleUserIcon" />
+
+            <!-- Botón de usuario con imagen -->
+            <Button fx:id="userButton" onAction="#handleUserIcon" styleClass="user-button"/>
         </ToolBar>
-    </top>
-    <center>
-        <VBox alignment="CENTER" spacing="10">
-            <Label fx:id="resumenLabel" text="Resumen financiero del mes:" style="-fx-font-weight: bold;" />
-            <Label text="Total Gastado: 120€" />
-            <Label text="Total Ingresado: 200€" />
-            <Label text="Saldo Actual: 80€" />
-            <HBox alignment="CENTER" spacing="10">
-                <Button text="Añadir Gasto" onAction="#añadirGasto" />
-                <Button text="Añadir Ingreso" onAction="#añadirIngreso" />
-            </HBox>
-            <HBox alignment="CENTER" spacing="10">
-                <Button text="Historial" onAction="#verHistorial" />
-                <Button text="Presupuestos" onAction="#verPresupuestos" />
+
+        <!-- Sección de Resumen -->
+        <VBox alignment="CENTER" spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label text="Resumen de Cuenta" styleClass="info-label" />
+            <HBox alignment="CENTER" spacing="30" styleClass="resumen-box">
+                <VBox alignment="CENTER" styleClass="resumen-item">
+                    <Label text="Total Gastado" />
+                    <Label fx:id="labelGasto" text="0 €" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="resumen-item">
+                    <Label text="Total Ingresado" />
+                    <Label fx:id="labelIngreso" text="0 €" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="resumen-item">
+                    <Label text="Saldo Actual" />
+                    <Label fx:id="labelSaldo" text="0 €" />
+                </VBox>
             </HBox>
         </VBox>
-    </center>
-</BorderPane>
+
+    </VBox>
+</StackPane>

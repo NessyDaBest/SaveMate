@@ -12,7 +12,7 @@
     -fx-font-weight: bold;
     -fx-background-radius: 8px;
     -fx-padding: 8px 16px;
-    
+
 }
 .button :hover{
 -fx-background-color: #3f8f41;

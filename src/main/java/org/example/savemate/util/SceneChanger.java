@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.savemate.controller.MainController;
 
 import java.io.IOException;
 
@@ -13,14 +14,12 @@ public class SceneChanger {
 
     public static void changeScene(Stage stage, String fxmlPath, String title) {
         if (stage.getScene() != null && stage.getScene().getRoot() != null) {
-            // Si ya tiene escena, hacer fade-out
             FadeTransition fadeOut = new FadeTransition(Duration.millis(200), stage.getScene().getRoot());
             fadeOut.setFromValue(1.0);
             fadeOut.setToValue(0.0);
             fadeOut.setOnFinished(event -> loadScene(stage, fxmlPath, title));
             fadeOut.play();
         } else {
-            // Si no tiene escena, cargar directamente
             loadScene(stage, fxmlPath, title);
         }
     }
@@ -31,13 +30,20 @@ public class SceneChanger {
             Parent root = loader.load();
 
             Scene scene = new Scene(root);
+
+            // Añadir CSS según el FXML cargado
+            if (fxmlPath.contains("Main")) {
+                scene.getStylesheets().add(SceneChanger.class.getResource("/org/example/savemate/css/app_main.css").toExternalForm());
+            } else {
+                scene.getStylesheets().add(SceneChanger.class.getResource("/org/example/savemate/css/app.css").toExternalForm());
+            }
+
             stage.setScene(scene);
             AppIconLoader.applyAppIcons(stage);
             stage.setTitle(title);
-            stage.setWidth(400);
+            stage.setWidth(720);
             stage.setHeight(500);
 
-            // Fade-in animado
             root.setOpacity(0);
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
             fadeIn.setFromValue(0.0);
@@ -46,9 +52,11 @@ public class SceneChanger {
 
             stage.show();
         } catch (IOException e) {
+            System.err.println("Error cargando la escena: " + fxmlPath);
             e.printStackTrace();
         }
     }
+
 
     public static void openScene(String fxmlPath, String title) {
         Stage newStage = new Stage();
@@ -71,6 +79,7 @@ public class SceneChanger {
 
             popupStage.show();
         } catch (IOException e) {
+            System.err.println("Error al cargar la escena desde: " + fxmlPath);
             e.printStackTrace();
         }
     }

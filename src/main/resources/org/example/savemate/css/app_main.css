@@ -1,0 +1,45 @@
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: #f5f7fa;
+}
+
+/* Barra superior */
+.toolbar {
+    -fx-background-color: white;
+    -fx-padding: 0 16px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1px 0;
+    -fx-spacing: 10px;
+    -fx-alignment: center-left;
+}
+
+/* Botón usuario */
+.user-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px;
+    -fx-cursor: hand;
+}
+.user-button:hover {
+    -fx-background-color: #eaeaea;
+}
+
+/* Panel resumen financiero */
+.resumen-box {
+    -fx-padding: 20px;
+}
+
+.resumen-item {
+    -fx-spacing: 6px;
+    -fx-alignment: center;
+    -fx-min-width: 100px;
+}
+
+.label {
+    -fx-font-size: 14px;
+}
+
+.info-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}

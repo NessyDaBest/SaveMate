@@ -48,6 +48,9 @@ dependencies {
         exclude(group: 'org.openjfx')
     }
 
+    //JFoenix libreria complementaria para JavaFX
+    implementation ('com.jfoenix:jfoenix:9.0.10')
+
     //Encriptador de contraseñas
     implementation('org.mindrot:jbcrypt:0.4')
 

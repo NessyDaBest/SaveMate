@@ -6,11 +6,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
-import org.example.savemate.util.SceneChanger;
-import org.example.savemate.util.AnimatedButtonFactory;
-import org.example.savemate.util.RememberMe;
+import org.example.savemate.util.*;
 import org.example.savemate.database.DatabaseConnector;
-import org.example.savemate.util.PasswordHasher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,6 +57,10 @@ public class LoginController {
                 String hash = rs.getString("contraseña_hash");
 
                 if (PasswordHasher.check(password, hash)) {
+
+                    // Guardar usuario logeado en sesión
+                    UserSession.iniciarSesion(rs.getString("nombre"), email);
+
                     // Guardar si se marcó "Recuérdame"
                     if (rememberCheckBox.isSelected()) {
                         RememberMe.saveCredentials(email, password);
@@ -70,15 +71,15 @@ public class LoginController {
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     SceneChanger.changeScene(stage, "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
                 } else {
-                    showAlert("Contraseña incorrecta", Alert.AlertType.ERROR);
+                    CustomAlert.showError("Contraseña incorrecta");
                 }
             } else {
-                showAlert("El correo no está registrado", Alert.AlertType.ERROR);
+                CustomAlert.showError("El correo no está registrado");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Error al conectar con la base de datos", Alert.AlertType.ERROR);
+            CustomAlert.showError("Error al conectar con la base de datos");
         }
     }
 

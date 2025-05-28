@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.Image?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.savemate.controller.UserInfoController"
+            stylesheets="@../css/app.css">
+
+    <children>
+        <VBox alignment="CENTER" spacing="15"
+              AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+              AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+              style="-fx-padding: 30;">
+
+            <ImageView fx:id="userIcon" fitWidth="100" fitHeight="100" preserveRatio="true"
+                       pickOnBounds="true">
+                <image>
+                    <Image url="@../img/user_icon_home_256x256.png"/>
+                </image>
+            </ImageView>
+
+            <Label fx:id="nameLabel" text="Nombre completo usuario" styleClass="info-label"/>
+            <Label fx:id="emailLabel" text="Correo electrónico" styleClass="info-label-secundario"/>
+
+            <StackPane fx:id="logoutButtonContainer" maxWidth="250" />
+        </VBox>
+    </children>
+</AnchorPane>

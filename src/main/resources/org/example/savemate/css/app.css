@@ -26,6 +26,16 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
+.info-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+.info-label-secundario {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
+}
 
 .input-container .text-field,
 .input-container .password-field {

@@ -3,6 +3,9 @@ package org.example.savemate.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import org.example.savemate.util.SceneChanger;
+import org.example.savemate.util.UserSession;
 
 public class MainController {
 
@@ -30,7 +33,14 @@ public class MainController {
 
     @FXML
     private void handleUserIcon() {
-        showAlert("Opciones de usuario (simulado)", Alert.AlertType.INFORMATION);
+        Stage mainStage = (Stage) resumenLabel.getScene().getWindow();
+
+        SceneChanger.openFXMLPopup("/org/example/savemate/fxml/UserInfo.fxml", "Cuenta Iniciada",
+                (controller, stage) -> {
+                    UserInfoController userInfo = (UserInfoController) controller;
+                    userInfo.initData(stage, mainStage, UserSession.getNombre(), UserSession.getEmail());
+                }
+        );
     }
 
     private void showAlert(String msg, Alert.AlertType type) {

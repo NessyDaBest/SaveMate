@@ -18,7 +18,7 @@
             <JFXHamburger fx:id="hamburger" styleClass="jfx-hamburger" />
 
             <!-- Título de cuenta bancaria -->
-            <Label fx:id="tituloCuenta" text="Cuenta Ahorros" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+            <Label fx:id="tituloCuenta" text="Cuenta Ahorros" styleClass="cuenta-label" />
 
             <Pane HBox.hgrow="ALWAYS" />
 
@@ -37,8 +37,8 @@
                 <JFXRippler onMouseClicked="#onTotalGastadoClick">
                     <StackPane styleClass="resumen-card">
                         <VBox alignment="CENTER" spacing="5">
-                            <Label text="Total Gastado" styleClass="resumen-label" />
-                            <Label fx:id="labelGasto" text="0 €" styleClass="resumen-value" />
+                            <Label text="Total Gastos" styleClass="resumen-label" />
+                            <Label fx:id="labelGasto" text="0 €" styleClass="resumen-value-gasto" />
                         </VBox>
                     </StackPane>
                 </JFXRippler>
@@ -46,8 +46,8 @@
                 <JFXRippler onMouseClicked="#onTotalIngresadoClick">
                     <StackPane styleClass="resumen-card">
                         <VBox alignment="CENTER" spacing="5">
-                            <Label text="Total Ingresado" styleClass="resumen-label" />
-                            <Label fx:id="labelIngreso" text="0 €" styleClass="resumen-value" />
+                            <Label text="Total Ingresos" styleClass="resumen-label" />
+                            <Label fx:id="labelIngreso" text="0 €" styleClass="resumen-value-ingreso" />
                         </VBox>
                     </StackPane>
                 </JFXRippler>
@@ -55,12 +55,18 @@
                 <JFXRippler onMouseClicked="#onSaldoActualClick">
                     <StackPane styleClass="resumen-card">
                         <VBox alignment="CENTER" spacing="5">
-                            <Label text="Saldo Actual" styleClass="resumen-label" />
-                            <Label fx:id="labelSaldo" text="0 €" styleClass="resumen-value" />
+                            <Label text="Saldo Disponible" styleClass="resumen-label" />
+                            <Label fx:id="labelSaldo" text="0 €" styleClass="resumen-value-saldo" />
                         </VBox>
                     </StackPane>
                 </JFXRippler>
             </HBox>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 0 20 0 20;">
+                <Label text="Año:" />
+                <ComboBox fx:id="añoComboBox" prefWidth="100" />
+            </HBox>
+
             <BarChart fx:id="gastoMensualChart" title="Gastos Mensuales"
                       prefHeight="300" prefWidth="600"
                       styleClass="gasto-barchart">

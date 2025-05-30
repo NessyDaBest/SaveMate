@@ -17,6 +17,12 @@
 /* Hamburger menu - Asegurar que esté siempre clickeable */
 .jfx-hamburger {
     -fx-view-order: -3; /* Más al frente que la toolbar */
+    -fx-background-radius: 6px;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+.jfx-hamburger:hover {
+    -fx-background-color: #eaeaea;
 }
 .jfx-hamburger StackPane{
     -fx-background-color: #75BB8B;
@@ -31,6 +37,20 @@
     -fx-view-order: -3; /* También por encima del drawer */
 }
 .user-button:hover {
+    -fx-background-color: #eaeaea;
+}
+
+/*Cuenta bancaria*/
+.cuenta-label {
+    -fx-font-weight: bold; 
+    -fx-font-size: 16px;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px;
+    -fx-cursor: hand;
+    -fx-view-order: -3; /* También por encima del drawer */
+}
+.cuenta-label:hover {
     -fx-background-color: #eaeaea;
 }
 
@@ -60,11 +80,20 @@
     -fx-font-size: 14px;
     -fx-text-fill: #555;
 }
-
-.resumen-value {
-    -fx-font-size: 18px;
+.resumen-value-gasto{
+    -fx-text-fill: #C73C31;
     -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+.resumen-value-ingreso{
+    -fx-text-fill: #75BB8B;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+.resumen-value-saldo{
     -fx-text-fill: #2c3e50;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
 }
 
 .label {
@@ -83,8 +112,13 @@
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
 }
-.default-color0{
-    -fx-bar-fill: #C73C31;
+
+.combo-box:focused,
+.combo-box:focused .arrow-button,
+.combo-box:focused .text-field {
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
 }
 
 

@@ -3,7 +3,9 @@ package org.example.savemate.controller;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -21,6 +23,8 @@ import org.example.savemate.util.Sesion;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 
+import java.util.Map;
+
 public class MainController {
 
     @FXML private JFXDrawer drawer;
@@ -31,6 +35,7 @@ public class MainController {
     @FXML private Label labelIngreso;
     @FXML private Label labelSaldo;
     @FXML private BarChart<String, Number> gastoMensualChart;
+    @FXML private ComboBox<String> añoComboBox;
 
     private HamburgerSlideCloseTransition transition;
     private Cuenta cuentaActual;
@@ -40,6 +45,7 @@ public class MainController {
         //tituloCuenta.setText("Cuenta Ahorros");
         // Obtener y mostrar cuenta del usuario
         cargarCuentaDelUsuario();
+        configurarFiltroPorAño();
 
         // Animación del botón hamburguesa
         transition = new HamburgerSlideCloseTransition(hamburger);
@@ -103,7 +109,7 @@ public class MainController {
         drawer.setOverLayVisible(true);
 
         initDrawerContent();
-        loadGastosMensuales();
+        loadMonto();
     }
 
     // Esta función se llamará manualmente desde SceneChanger
@@ -120,27 +126,30 @@ public class MainController {
         VBox menu = new VBox(10);
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
-        VBox subMenu = new VBox(5);
-        subMenu.setVisible(false);
-        subMenu.setStyle("-fx-padding: 0 0 0 15;");
+        // Lista de opciones del drawer
+        String[] opciones = {"Inicio", "Añadir Gasto", "Añadir Ingreso", "Crear Cuenta", "Presupuesto"};
 
-        Button exportBtn = new Button("Exportar a .xlsx");
-        Button importBtn = new Button("Importar desde .xlsx");
-        styleMenuButton(exportBtn);
-        styleMenuButton(importBtn);
-        subMenu.getChildren().addAll(exportBtn, importBtn);
-
-        Button archivoBtn = new Button("Archivo");
-        styleMenuButton(archivoBtn);
-        archivoBtn.setOnMouseEntered(e -> subMenu.setVisible(true));
-        archivoBtn.setOnMouseExited(e -> subMenu.setVisible(false));
-        subMenu.setOnMouseExited(e -> subMenu.setVisible(false));
-
-        menu.getChildren().addAll(archivoBtn, subMenu);
-
-        for (String txt : new String[]{"Añadir Gasto", "Añadir Ingreso", "Cuentas", "Presupuesto"}) {
+        for (String txt : opciones) {
             Button btn = new Button(txt);
             styleMenuButton(btn);
+
+            // Aquí puedes definir el comportamiento de cada botón según su texto
+            btn.setOnAction(e -> {
+                switch (txt) {
+                    case "Inicio" -> {
+                        SceneChanger.changeScene(
+                                (Stage) tituloCuenta.getScene().getWindow(),
+                                "/org/example/savemate/fxml/Main.fxml",
+                                "SaveMate - Principal"
+                        );
+                    }
+                    case "Añadir Gasto" -> System.out.println("Navegar a Añadir Gasto");
+                    case "Añadir Ingreso" -> System.out.println("Navegar a Añadir Ingreso");
+                    case "Crear Cuenta" -> System.out.println("Navegar a Crear Cuenta");
+                    case "Presupuesto" -> System.out.println("Navegar a Presupuesto");
+                }
+            });
+
             menu.getChildren().add(btn);
         }
 
@@ -149,7 +158,32 @@ public class MainController {
 
     private void styleMenuButton(Button btn) {
         btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #333; -fx-font-size: 14px;");
+        btn.setStyle("""
+        -fx-background-color: transparent;
+        -fx-background-radius: 6px;
+        -fx-padding: 6px;
+        -fx-cursor: hand;
+        -fx-text-fill: #333;
+        -fx-font-size: 14px;
+    """);
+
+        //Efecto :Hover
+        btn.setOnMouseEntered(e -> btn.setStyle("""
+        -fx-background-color: #eaeaea;
+        -fx-background-radius: 6px;
+        -fx-padding: 6px;
+        -fx-cursor: hand;
+        -fx-text-fill: #333;
+        -fx-font-size: 14px;
+    """));
+        btn.setOnMouseExited(e -> btn.setStyle("""
+        -fx-background-color: transparent;
+        -fx-background-radius: 6px;
+        -fx-padding: 6px;
+        -fx-cursor: hand;
+        -fx-text-fill: #333;
+        -fx-font-size: 14px;
+    """));
     }
 
     //CargarNombreCuenta
@@ -163,42 +197,77 @@ public class MainController {
             tituloCuenta.setText("Cuenta no encontrada");
         }
     }
+    //Combo box para el filtro por año
+    private void configurarFiltroPorAño() {
+        int añoActual = java.time.Year.now().getValue();
 
-    private int[] obtenerGastosPorMesDesdeBD() {
-        int[] gastos = new int[12];
+        // Rango de años desde 2022 hasta el año actual
+        for (int año = 2022; año <= añoActual; año++) {
+            añoComboBox.getItems().add(String.valueOf(año));
+        }
 
-        // Aquí deberías hacer una consulta a la BD para obtener el total de gastos por mes
-        // Por ahora es un ejemplo con datos aleatorios
-        gastos[0] = 320;
-        gastos[1] = 210;
-        gastos[2] = 420;
-        gastos[3] = 760;
-        gastos[4] = 900;
-        gastos[5] = 180;
-        gastos[6] = 1000;
-        gastos[7] = 500;
-        gastos[8] = 620;
-        gastos[9] = 400;
-        gastos[10] = 200;
-        gastos[11] = 880;
+        añoComboBox.setValue(String.valueOf(añoActual)); // Año seleccionado por defecto
 
-        return gastos;
+        añoComboBox.setOnAction(e -> {
+            loadMonto(); // Recarga el gráfico con el año nuevo
+        });
     }
 
-    private void loadGastosMensuales() {
+    private void loadMonto() {
+        if (cuentaActual == null) return;
+
+        int añoSeleccionado = Integer.parseInt(añoComboBox.getValue());
+        Map<Integer, Double> gastosPorMes = CuentaDAO.obtenerGastosMensuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        Map<Integer, Double> ingresosPorMes = CuentaDAO.obtenerIngresosMensuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+
         XYChart.Series<String, Number> gastosSeries = new XYChart.Series<>();
         gastosSeries.setName("Gastos");
 
-        // Supongamos que estos son los datos provisionales para mostrar (test o demo)
-        int[] gastosPorMes = obtenerGastosPorMesDesdeBD(); // del 0 (enero) al 11 (diciembre)
-        String[] nombresMeses = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+        XYChart.Series<String, Number> ingresosSeries = new XYChart.Series<>();
+        ingresosSeries.setName("Ingresos");
 
-        for (int i = 0; i < 12; i++) {
-            gastosSeries.getData().add(new XYChart.Data<>(nombresMeses[i], gastosPorMes[i]));
+        for (int i = 1; i <= 12; i++) {
+            String mes = String.valueOf(i);
+
+            // Gastos
+            double gasto = gastosPorMes.getOrDefault(i, 0.0);
+            XYChart.Data<String, Number> dataGasto = new XYChart.Data<>(mes, gasto);
+            gastosSeries.getData().add(dataGasto);
+            Tooltip tooltipGasto = new Tooltip("Gasto Mes " + i + ": " + String.format("%.2f", gasto) + " €");
+            dataGasto.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-bar-fill: #C73C31;"); // rojo
+                    Tooltip.install(newNode, tooltipGasto);
+                }
+            });
+
+            // Ingresos
+            double ingreso = ingresosPorMes.getOrDefault(i, 0.0);
+            XYChart.Data<String, Number> dataIngreso = new XYChart.Data<>(mes, ingreso);
+            ingresosSeries.getData().add(dataIngreso);
+            Tooltip tooltipIngreso = new Tooltip("Ingreso Mes " + i + ": " + String.format("%.2f", ingreso) + " €");
+            dataIngreso.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-bar-fill: #75BB8B;"); // verde
+                    Tooltip.install(newNode, tooltipIngreso);
+                }
+            });
         }
+        // Obtener totales y actualizar labels
+        double totalGastos = CuentaDAO.obtenerTotalGastosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        double totalIngresos = CuentaDAO.obtenerTotalIngresosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        // El saldo se calcula con todos los años
+        double gastosAcumulados = CuentaDAO.obtenerTotalGastosAcumulado(cuentaActual.getIdCuenta());
+        double ingresosAcumulados = CuentaDAO.obtenerTotalIngresosAcumulado(cuentaActual.getIdCuenta());
+        double saldo = ingresosAcumulados - gastosAcumulados;
+
+        // Mostrar formateado
+        labelGasto.setText(String.format("%.2f €", totalGastos));
+        labelIngreso.setText(String.format("%.2f €", totalIngresos));
+        labelSaldo.setText(String.format("%.2f €", saldo));
 
         gastoMensualChart.getData().clear();
-        gastoMensualChart.getData().add(gastosSeries);
+        gastoMensualChart.getData().addAll(gastosSeries, ingresosSeries);
         gastoMensualChart.setLegendVisible(false);
     }
 

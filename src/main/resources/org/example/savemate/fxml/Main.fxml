@@ -8,15 +8,11 @@
 
 <StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.MainController">
 
-    <!-- Drawer Lateral -->
-    <JFXDrawer fx:id="drawer" defaultDrawerSize="220" overLayVisible="true" resizableOnDrag="true" />
-
     <!-- Contenedor Principal -->
     <VBox>
-
         <!-- Barra Superior -->
         <ToolBar fx:id="topBar" styleClass="toolbar">
-            <JFXHamburger fx:id="hamburger" />
+            <JFXHamburger fx:id="hamburger" styleClass="jfx-hamburger" />
 
             <!-- Título de cuenta bancaria -->
             <Label fx:id="tituloCuenta" text="Cuenta Ahorros" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
@@ -48,6 +44,9 @@
                 </VBox>
             </HBox>
         </VBox>
-
     </VBox>
+
+    <!-- Drawer Lateral con mouseTransparent cuando está cerrado -->
+    <JFXDrawer fx:id="drawer" defaultDrawerSize="220" overLayVisible="true" resizableOnDrag="true" mouseTransparent="false" />
+
 </StackPane>

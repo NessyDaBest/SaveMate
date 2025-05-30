@@ -6,7 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -14,8 +13,13 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerSlideCloseTransition;
 
+import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.model.Cuenta;
 import org.example.savemate.util.SceneChanger;
-import org.example.savemate.util.UserSession;
+import org.example.savemate.util.Sesion;
+
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 
 public class MainController {
 
@@ -26,12 +30,16 @@ public class MainController {
     @FXML private Label labelGasto;
     @FXML private Label labelIngreso;
     @FXML private Label labelSaldo;
+    @FXML private BarChart<String, Number> gastoMensualChart;
 
     private HamburgerSlideCloseTransition transition;
+    private Cuenta cuentaActual;
 
     @FXML
     public void initialize() {
-        tituloCuenta.setText("Cuenta Ahorros");
+        //tituloCuenta.setText("Cuenta Ahorros");
+        // Obtener y mostrar cuenta del usuario
+        cargarCuentaDelUsuario();
 
         // Animación del botón hamburguesa
         transition = new HamburgerSlideCloseTransition(hamburger);
@@ -95,6 +103,7 @@ public class MainController {
         drawer.setOverLayVisible(true);
 
         initDrawerContent();
+        loadGastosMensuales();
     }
 
     // Esta función se llamará manualmente desde SceneChanger
@@ -143,13 +152,84 @@ public class MainController {
         btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #333; -fx-font-size: 14px;");
     }
 
+    //CargarNombreCuenta
+    private void cargarCuentaDelUsuario() {
+        int idUsuario = Sesion.getUsuarioActual().getIdUsuario(); // ← asegúrate que esto existe
+        cuentaActual = CuentaDAO.obtenerCuentaPorUsuario(idUsuario);
+
+        if (cuentaActual != null) {
+            tituloCuenta.setText(cuentaActual.getNombre());
+        } else {
+            tituloCuenta.setText("Cuenta no encontrada");
+        }
+    }
+
+    private int[] obtenerGastosPorMesDesdeBD() {
+        int[] gastos = new int[12];
+
+        // Aquí deberías hacer una consulta a la BD para obtener el total de gastos por mes
+        // Por ahora es un ejemplo con datos aleatorios
+        gastos[0] = 320;
+        gastos[1] = 210;
+        gastos[2] = 420;
+        gastos[3] = 760;
+        gastos[4] = 900;
+        gastos[5] = 180;
+        gastos[6] = 1000;
+        gastos[7] = 500;
+        gastos[8] = 620;
+        gastos[9] = 400;
+        gastos[10] = 200;
+        gastos[11] = 880;
+
+        return gastos;
+    }
+
+    private void loadGastosMensuales() {
+        XYChart.Series<String, Number> gastosSeries = new XYChart.Series<>();
+        gastosSeries.setName("Gastos");
+
+        // Supongamos que estos son los datos provisionales para mostrar (test o demo)
+        int[] gastosPorMes = obtenerGastosPorMesDesdeBD(); // del 0 (enero) al 11 (diciembre)
+        String[] nombresMeses = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+
+        for (int i = 0; i < 12; i++) {
+            gastosSeries.getData().add(new XYChart.Data<>(nombresMeses[i], gastosPorMes[i]));
+        }
+
+        gastoMensualChart.getData().clear();
+        gastoMensualChart.getData().add(gastosSeries);
+        gastoMensualChart.setLegendVisible(false);
+    }
+
     @FXML
     private void handleUserIcon() {
         Stage mainStage = (Stage) tituloCuenta.getScene().getWindow();
+
+        // Obtener datos del usuario desde la nueva sesión
+        String nombre = Sesion.getUsuarioActual().getNombre();
+        String email = Sesion.getUsuarioActual().getEmail();
+
         SceneChanger.openFXMLPopup("/org/example/savemate/fxml/UserInfo.fxml", "Cuenta Iniciada",
                 (controller, stage) -> {
                     UserInfoController userInfo = (UserInfoController) controller;
-                    userInfo.initData(stage, mainStage, UserSession.getNombre(), UserSession.getEmail());
+                    userInfo.initData(stage, mainStage, nombre, email);
                 });
+    }
+
+    @FXML
+    private void onTotalGastadoClick() {
+        System.out.println("Total Gastado clicado.");
+        // Aquí puedes abrir una nueva vista, mostrar más info, etc.
+    }
+
+    @FXML
+    private void onTotalIngresadoClick() {
+        System.out.println("Total Ingresado clicado.");
+    }
+
+    @FXML
+    private void onSaldoActualClick() {
+        System.out.println("Saldo Actual clicado.");
     }
 }

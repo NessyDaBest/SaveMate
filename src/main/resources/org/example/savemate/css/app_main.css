@@ -39,10 +39,32 @@
     -fx-padding: 20px;
 }
 
-.resumen-item {
-    -fx-spacing: 6px;
-    -fx-alignment: center;
-    -fx-min-width: 100px;
+.info-title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.resumen-card {
+    -fx-padding: 15px;
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-min-width: 140px;
+}
+
+.resumen-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555;
+}
+
+.resumen-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
 }
 
 .label {
@@ -53,6 +75,18 @@
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
+/*Gráfico de barras*/
+.gasto-barchart {
+    -fx-padding: 20px;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #adadad;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.default-color0{
+    -fx-bar-fill: #C73C31;
+}
+
 
 /* Drawer - Asegurar que no bloquee el toolbar */
 .jfx-drawer {

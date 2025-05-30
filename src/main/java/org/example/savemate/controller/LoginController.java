@@ -6,6 +6,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
+import org.example.savemate.model.Usuario;
 import org.example.savemate.util.*;
 import org.example.savemate.database.DatabaseConnector;
 
@@ -70,7 +71,8 @@ public class LoginController {
                 if (PasswordHasher.check(password, hash)) {
 
                     // Guardar usuario logeado en sesión
-                    UserSession.iniciarSesion(rs.getString("nombre"), email);
+                    Usuario usuario = new Usuario(rs.getInt("id_usuario"), rs.getString("nombre"), email);
+                    Sesion.iniciarSesion(usuario);
 
                     // Guardar si se marcó "Recuérdame"
                     if (rememberCheckBox.isSelected()) {

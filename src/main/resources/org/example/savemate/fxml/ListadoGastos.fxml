@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.ListadoGastosController">
+
+    <!-- Contenedor Principal -->
+    <VBox>
+        <!-- Barra superior reutilizada -->
+        <ToolBar fx:id="topBar" styleClass="toolbar">
+            <JFXHamburger fx:id="hamburger" styleClass="jfx-hamburger" />
+            <Label fx:id="tituloCuenta" text="Cuenta Ahorros" styleClass="cuenta-label" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="userButton" onAction="#handleUserIcon" styleClass="user-button"/>
+        </ToolBar>
+
+        <!-- Contenido principal -->
+        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 20;">
+            <Label text="Listado de Gastos" styleClass="info-title-label"/>
+
+            <TableView fx:id="tablaGastos" prefWidth="600">
+                <columns>
+                    <TableColumn fx:id="colFecha" text="Fecha" prefWidth="150"/>
+                    <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="300"/>
+                    <TableColumn fx:id="colMonto" text="Monto" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </VBox>
+
+    <!-- Drawer lateral al mismo nivel que el contenido -->
+    <JFXDrawer fx:id="drawer"
+               defaultDrawerSize="220"
+               overLayVisible="true"
+               resizableOnDrag="true"
+               mouseTransparent="false"/>
+</StackPane>

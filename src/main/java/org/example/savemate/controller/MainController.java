@@ -156,7 +156,7 @@ public class MainController {
         drawer.setSidePane(menu);
     }
 
-    private void styleMenuButton(Button btn) {
+    public static void styleMenuButton(Button btn) {
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setStyle("""
         -fx-background-color: transparent;
@@ -288,8 +288,11 @@ public class MainController {
 
     @FXML
     private void onTotalGastadoClick() {
-        System.out.println("Total Gastado clicado.");
-        // Aquí puedes abrir una nueva vista, mostrar más info, etc.
+        SceneChanger.changeScene(
+                (Stage) tituloCuenta.getScene().getWindow(),
+                "/org/example/savemate/fxml/ListadoGastos.fxml",
+                "Listado de Gastos"
+        );
     }
 
     @FXML

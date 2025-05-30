@@ -32,10 +32,10 @@ public class SceneChanger {
             Scene scene = new Scene(root);
 
             // Añadir CSS según el FXML cargado
-            if (fxmlPath.contains("Main")) {
-                scene.getStylesheets().add(SceneChanger.class.getResource("/org/example/savemate/css/app_main.css").toExternalForm());
-            } else {
+            if (fxmlPath.contains("Login") || fxmlPath.contains("Register")) {
                 scene.getStylesheets().add(SceneChanger.class.getResource("/org/example/savemate/css/app.css").toExternalForm());
+            } else {
+                scene.getStylesheets().add(SceneChanger.class.getResource("/org/example/savemate/css/app_main.css").toExternalForm());
             }
 
             stage.setScene(scene);
@@ -44,6 +44,14 @@ public class SceneChanger {
             stage.setWidth(720);
             stage.setHeight(500);
 
+            // ⚠️ Llamada genérica a postInitialize si existe
+            Object controller = loader.getController();
+            try {
+                controller.getClass().getMethod("postInitialize", Stage.class).invoke(controller, stage);
+            } catch (NoSuchMethodException ignored) {
+                // No pasa nada si el controlador no tiene ese método
+            }
+
             root.setOpacity(0);
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), root);
             fadeIn.setFromValue(0.0);
@@ -51,7 +59,7 @@ public class SceneChanger {
             fadeIn.play();
 
             stage.show();
-        } catch (IOException e) {
+        } catch (IOException | ReflectiveOperationException e) {
             System.err.println("Error cargando la escena: " + fxmlPath);
             e.printStackTrace();
         }

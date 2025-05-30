@@ -1,11 +1,14 @@
 package org.example.savemate.database;
 
 import org.example.savemate.model.Cuenta;
+import org.example.savemate.model.Gasto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CuentaDAO {
@@ -95,6 +98,39 @@ public class CuentaDAO {
             System.err.println("Error obteniendo gastos acumulados: " + e.getMessage());
         }
         return 0;
+    }
+    public static List<Gasto> listarGastosPorCuenta(int idCuenta) {
+        List<Gasto> lista = new ArrayList<>();
+
+        String query = """
+        SELECT id_gasto, monto, fecha, descripcion
+        FROM gasto
+        WHERE id_cuenta = ?
+        ORDER BY fecha DESC
+    """;
+
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Gasto gasto = new Gasto(
+                        rs.getInt("id_gasto"),
+                        rs.getDouble("monto"),
+                        rs.getDate("fecha").toLocalDate(),
+                        rs.getString("descripcion"),
+                        idCuenta
+                );
+                lista.add(gasto);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al listar gastos: " + e.getMessage());
+        }
+
+        return lista;
     }
 
 

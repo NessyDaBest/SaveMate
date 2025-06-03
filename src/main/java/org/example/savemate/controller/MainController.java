@@ -143,8 +143,8 @@ public class MainController {
                                 "SaveMate - Principal"
                         );
                     }
-                    case "Añadir Gasto" -> System.out.println("Navegar a Añadir Gasto");
-                    case "Añadir Ingreso" -> System.out.println("Navegar a Añadir Ingreso");
+                    case "Gasto" -> System.out.println("Navegar a Añadir Gasto");
+                    case "Ingreso" -> System.out.println("Navegar a Añadir Ingreso");
                     case "Crear Cuenta" -> System.out.println("Navegar a Crear Cuenta");
                     case "Presupuesto" -> System.out.println("Navegar a Presupuesto");
                 }
@@ -283,6 +283,12 @@ public class MainController {
                 (controller, stage) -> {
                     UserInfoController userInfo = (UserInfoController) controller;
                     userInfo.initData(stage, mainStage, nombre, email);
+
+                    // Hacer que el popup sea modal y bloquee la interacción con la ventana principal
+                    stage.initOwner(mainStage);
+                    stage.setResizable(false);
+                    stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                    stage.setAlwaysOnTop(true); // opcional, para que siempre esté al frente
                 });
     }
 
@@ -297,11 +303,19 @@ public class MainController {
 
     @FXML
     private void onTotalIngresadoClick() {
-        System.out.println("Total Ingresado clicado.");
+        SceneChanger.changeScene(
+                (Stage) tituloCuenta.getScene().getWindow(),
+                "/org/example/savemate/fxml/ListadoIngresos.fxml",
+                "Listado de Ingresos"
+        );
     }
 
     @FXML
     private void onSaldoActualClick() {
-        System.out.println("Saldo Actual clicado.");
+        SceneChanger.changeScene(
+                (Stage) tituloCuenta.getScene().getWindow(),
+                "/org/example/savemate/fxml/ListadoMovimientos.fxml",
+                "Listado de Movimientos"
+        );
     }
 }

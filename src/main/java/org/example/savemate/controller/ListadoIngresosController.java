@@ -12,19 +12,19 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.savemate.database.CuentaDAO;
 import org.example.savemate.model.Cuenta;
-import org.example.savemate.model.Gasto;
+import org.example.savemate.model.Ingreso;
 import org.example.savemate.util.SceneChanger;
 import org.example.savemate.util.Sesion;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class ListadoGastosController {
+public class ListadoIngresosController {
 
-    @FXML private TableView<Gasto> tablaGastos;
-    @FXML private TableColumn<Gasto, LocalDate> colFecha;
-    @FXML private TableColumn<Gasto, String> colDescripcion;
-    @FXML private TableColumn<Gasto, Double> colMonto;
+    @FXML private TableView<Ingreso> tablaIngresos;
+    @FXML private TableColumn<Ingreso, LocalDate> colFecha;
+    @FXML private TableColumn<Ingreso, String> colDescripcion;
+    @FXML private TableColumn<Ingreso, Double> colMonto;
 
     @FXML private Label tituloCuenta;
     @FXML private Button userButton;
@@ -54,8 +54,8 @@ public class ListadoGastosController {
         colDescripcion.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDescripcion()));
         colMonto.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getMonto()));
 
-        List<Gasto> gastos = CuentaDAO.listarGastosPorCuenta(cuentaActual.getIdCuenta());
-        tablaGastos.getItems().setAll(gastos);
+        List<Ingreso> ingresos = CuentaDAO.listarIngresosPorCuenta(cuentaActual.getIdCuenta());
+        tablaIngresos.getItems().setAll(ingresos);
 
         hamburger.toFront();
         hamburger.setViewOrder(-1.0);

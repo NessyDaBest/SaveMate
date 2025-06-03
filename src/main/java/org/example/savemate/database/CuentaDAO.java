@@ -2,10 +2,13 @@ package org.example.savemate.database;
 
 import org.example.savemate.model.Cuenta;
 import org.example.savemate.model.Gasto;
+import org.example.savemate.model.Ingreso;
+import org.example.savemate.model.Movimiento;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -196,5 +199,73 @@ public class CuentaDAO {
         }
         return 0;
     }
+    public static List<Ingreso> listarIngresosPorCuenta(int idCuenta) {
+        List<Ingreso> ingresos = new ArrayList<>();
+
+        String sql = "SELECT id_ingreso, id_cuenta, descripcion, monto, fecha FROM ingreso WHERE id_cuenta = ? ORDER BY fecha DESC";
+
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Ingreso ingreso = new Ingreso(
+                        rs.getInt("id_ingreso"),
+                        rs.getInt("id_cuenta"),
+                        rs.getString("descripcion"),
+                        rs.getDouble("monto"),
+                        rs.getDate("fecha").toLocalDate()
+                );
+                ingresos.add(ingreso);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ingresos;
+    }
+
+
+
+    public static List<Movimiento> listarMovimientosPorCuenta(int idCuenta) {
+        List<Movimiento> movimientos = new ArrayList<>();
+
+        String sql = """
+        SELECT fecha, descripcion, monto, 'ingreso' as tipo
+        FROM ingreso
+        WHERE id_cuenta = ?
+        UNION ALL
+        SELECT fecha, descripcion, monto, 'gasto' as tipo
+        FROM gasto
+        WHERE id_cuenta = ?
+        ORDER BY fecha DESC;
+    """;
+
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            stmt.setInt(2, idCuenta);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                LocalDate fecha = rs.getDate("fecha").toLocalDate();
+                String descripcion = rs.getString("descripcion");
+                double monto = rs.getDouble("monto");
+                boolean esIngreso = rs.getString("tipo").equals("ingreso");
+
+                movimientos.add(new Movimiento(fecha, descripcion, monto, esIngreso));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return movimientos;
+    }
+
 
 }

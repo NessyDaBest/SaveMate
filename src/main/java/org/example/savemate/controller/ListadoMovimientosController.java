@@ -12,19 +12,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.savemate.database.CuentaDAO;
 import org.example.savemate.model.Cuenta;
-import org.example.savemate.model.Gasto;
+import org.example.savemate.model.Ingreso;
+import org.example.savemate.model.Movimiento;
 import org.example.savemate.util.SceneChanger;
 import org.example.savemate.util.Sesion;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class ListadoGastosController {
+public class ListadoMovimientosController {
 
-    @FXML private TableView<Gasto> tablaGastos;
-    @FXML private TableColumn<Gasto, LocalDate> colFecha;
-    @FXML private TableColumn<Gasto, String> colDescripcion;
-    @FXML private TableColumn<Gasto, Double> colMonto;
+    @FXML private TableView<Movimiento> tablaMovimientos;
+    @FXML private TableColumn<Movimiento, LocalDate> colFecha;
+    @FXML private TableColumn<Movimiento, String> colDescripcion;
+    @FXML private TableColumn<Movimiento, Double> colMonto;
 
     @FXML private Label tituloCuenta;
     @FXML private Button userButton;
@@ -54,8 +55,29 @@ public class ListadoGastosController {
         colDescripcion.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDescripcion()));
         colMonto.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getMonto()));
 
-        List<Gasto> gastos = CuentaDAO.listarGastosPorCuenta(cuentaActual.getIdCuenta());
-        tablaGastos.getItems().setAll(gastos);
+        colMonto.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double monto, boolean empty) {
+                super.updateItem(monto, empty);
+                if (empty || monto == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    Movimiento movimiento = getTableView().getItems().get(getIndex());
+                    String signo = movimiento.isEsIngreso() ? "+" : "-";
+                    setText(String.format("%s%.2f €",signo, monto));
+                    if (movimiento.isEsIngreso()) {
+                        setStyle("-fx-text-fill: #75BB8B; -fx-font-weight: bold;");
+                    } else {
+                        setStyle("-fx-text-fill: #C73C31; -fx-font-weight: bold;");
+                    }
+                }
+            }
+        });
+
+        // Cargar datos
+        List<Movimiento> movimientos = CuentaDAO.listarMovimientosPorCuenta(cuentaActual.getIdCuenta());
+        tablaMovimientos.getItems().setAll(movimientos);
 
         hamburger.toFront();
         hamburger.setViewOrder(-1.0);

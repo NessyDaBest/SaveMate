@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.savemate.database.CuentaDAO;
@@ -26,6 +27,7 @@ public class ListadoMovimientosController {
     @FXML private TableColumn<Movimiento, LocalDate> colFecha;
     @FXML private TableColumn<Movimiento, String> colDescripcion;
     @FXML private TableColumn<Movimiento, Double> colMonto;
+    @FXML private HBox crudButtonBox;
 
     @FXML private Label tituloCuenta;
     @FXML private Button userButton;
@@ -82,6 +84,8 @@ public class ListadoMovimientosController {
         hamburger.toFront();
         hamburger.setViewOrder(-1.0);
         userButton.toFront();
+
+        crearBotonesCrud();
     }
 
     private void configurarHamburger() {
@@ -146,6 +150,36 @@ public class ListadoMovimientosController {
         hamburger.toFront();
         hamburger.setViewOrder(-1.0);
         userButton.toFront();
+    }
+
+    private void crearBotonesCrud() {
+        crudButtonBox.getChildren().clear();
+
+        String[] iconos = {
+                "/org/example/savemate/img/boton_editar_24x24.png",
+                "/org/example/savemate/img/anadir_24x24.png",
+                "/org/example/savemate/img/incorrect_24x24.png"
+        };
+
+        String[] tooltips = {
+                "Editar",
+                "Añadir",
+                "Eliminar"
+        };
+
+        for (int i = 0; i < iconos.length; i++) {
+            Button btn = new Button();
+            btn.getStyleClass().add("user-button");  // Reutilizo el estilo visual
+
+            ImageView img = new ImageView(new Image(getClass().getResourceAsStream(iconos[i])));
+            img.setFitWidth(20);
+            img.setFitHeight(20);
+
+            btn.setGraphic(img);
+            Tooltip.install(btn,new Tooltip(tooltips[i]));
+
+            crudButtonBox.getChildren().add(btn);
+        }
     }
 
     @FXML

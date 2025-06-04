@@ -28,4 +28,7 @@ public class Cuenta {
     public double getSaldoInicial() {
         return saldoInicial;
     }
+    public void setSaldoInicial(double saldoInicial) {
+        this.saldoInicial = saldoInicial;
+    }
 }

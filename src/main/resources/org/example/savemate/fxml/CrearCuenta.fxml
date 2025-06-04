@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.CrearCuentaController">
+    <center>
+        <VBox spacing="15" alignment="CENTER" style="-fx-padding: 20;">
+            <Label text="Nueva Cuenta" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
+
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Nombre" prefWidth="80"/>
+                <TextField fx:id="campoNombre" promptText="Nombre de la cuenta" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Banco" prefWidth="80"/>
+                <TextField fx:id="campoBanco" promptText="Nombre del banco" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Saldo" prefWidth="80"/>
+                <TextField fx:id="campoSaldo" promptText="Saldo inicial (€)" />
+            </HBox>
+
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Cancelar" onAction="#handleCancelar"/>
+                <Button text="Crear" onAction="#handleCrear"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

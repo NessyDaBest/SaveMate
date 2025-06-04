@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.savemate.controller.MainController;
@@ -82,8 +83,10 @@ public class SceneChanger {
             popupStage.setScene(new Scene(root));
             AppIconLoader.applyAppIcons(popupStage);
             popupStage.centerOnScreen();
+            popupStage.initModality(Modality.WINDOW_MODAL);
 
             initializer.init(loader.getController(), popupStage);
+
 
             popupStage.show();
         } catch (IOException e) {

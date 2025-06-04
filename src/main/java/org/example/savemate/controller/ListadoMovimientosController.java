@@ -43,7 +43,7 @@ public class ListadoMovimientosController {
         configurarHamburger();
 
         // Datos usuario y cuenta
-        cuentaActual = CuentaDAO.obtenerCuentaPorUsuario(Sesion.getUsuarioActual().getIdUsuario());
+        cuentaActual = Sesion.getCuentaActual();
         if (cuentaActual != null) {
             tituloCuenta.setText(cuentaActual.getNombre());
         }
@@ -85,7 +85,7 @@ public class ListadoMovimientosController {
         hamburger.setViewOrder(-1.0);
         userButton.toFront();
 
-        crearBotonesCrud();
+        //crearBotonesCrud();
     }
 
     private void configurarHamburger() {
@@ -126,16 +126,45 @@ public class ListadoMovimientosController {
         VBox menu = new VBox(10);
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
-        String[] opciones = {"Inicio", "Añadir Gasto", "Añadir Ingreso", "Crear Cuenta", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
+
         for (String txt : opciones) {
             Button btn = new Button(txt);
-            MainController.styleMenuButton(btn); // si usas el estilo común como static
+            MainController.styleMenuButton(btn);
+
             btn.setOnAction(e -> {
+                Stage ventanaActual = (Stage) tituloCuenta.getScene().getWindow();
                 switch (txt) {
-                    case "Inicio" -> SceneChanger.changeScene((Stage) tituloCuenta.getScene().getWindow(), "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
+                    case "Inicio" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/Main.fxml",
+                            "SaveMate - Principal");
+
+                    case "Gastos" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/ListadoGastos.fxml",
+                            "Listado de Gastos");
+
+                    case "Ingresos" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/ListadoIngresos.fxml",
+                            "Listado de Ingresos");
+
+                    case "Cuentas" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Cuentas.fxml",
+                            "Cuentas bancarias"
+                    );
+
+                    case "Presupuesto" -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                                "Esta sección aún no está implementada.",
+                                ButtonType.OK);
+                        alert.setHeaderText("En desarrollo");
+                        alert.showAndWait();
+                    }
+
                     default -> System.out.println("Acción no implementada aún: " + txt);
                 }
             });
+
             menu.getChildren().add(btn);
         }
 
@@ -152,13 +181,14 @@ public class ListadoMovimientosController {
         userButton.toFront();
     }
 
+    /*
     private void crearBotonesCrud() {
         crudButtonBox.getChildren().clear();
 
         String[] iconos = {
                 "/org/example/savemate/img/boton_editar_24x24.png",
                 "/org/example/savemate/img/anadir_24x24.png",
-                "/org/example/savemate/img/incorrect_24x24.png"
+                "/org/example/savemate/img/tacho_de_reciclaje_24x24.png"
         };
 
         String[] tooltips = {
@@ -181,6 +211,8 @@ public class ListadoMovimientosController {
             crudButtonBox.getChildren().add(btn);
         }
     }
+
+     */
 
     @FXML
     private void handleUserIcon() {

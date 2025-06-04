@@ -6,6 +6,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
+import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.model.Cuenta;
 import org.example.savemate.model.Usuario;
 import org.example.savemate.util.*;
 import org.example.savemate.database.DatabaseConnector;
@@ -73,6 +75,9 @@ public class LoginController {
                     // Guardar usuario logeado en sesión
                     Usuario usuario = new Usuario(rs.getInt("id_usuario"), rs.getString("nombre"), email);
                     Sesion.iniciarSesion(usuario);
+                    //Guarda la primera cuenta del usuario logeado
+                    Cuenta primeraCuenta = CuentaDAO.obtenerCuentaPorUsuario(usuario.getIdUsuario());
+                    Sesion.setCuentaActual(primeraCuenta);
 
                     // Guardar si se marcó "Recuérdame"
                     if (rememberCheckBox.isSelected()) {

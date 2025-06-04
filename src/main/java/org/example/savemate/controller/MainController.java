@@ -2,10 +2,7 @@ package org.example.savemate.controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
@@ -127,26 +124,48 @@ public class MainController {
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
         // Lista de opciones del drawer
-        String[] opciones = {"Inicio", "Añadir Gasto", "Añadir Ingreso", "Crear Cuenta", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
 
         for (String txt : opciones) {
             Button btn = new Button(txt);
-            styleMenuButton(btn);
+            styleMenuButton(btn); // Método estático o interno de MainController
 
-            // Aquí puedes definir el comportamiento de cada botón según su texto
             btn.setOnAction(e -> {
+                Stage ventanaActual = (Stage) tituloCuenta.getScene().getWindow();
+
                 switch (txt) {
-                    case "Inicio" -> {
-                        SceneChanger.changeScene(
-                                (Stage) tituloCuenta.getScene().getWindow(),
-                                "/org/example/savemate/fxml/Main.fxml",
-                                "SaveMate - Principal"
-                        );
+                    case "Inicio" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Main.fxml",
+                            "SaveMate - Principal"
+                    );
+
+                    case "Gastos" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/ListadoGastos.fxml",
+                            "Listado de Gastos"
+                    );
+
+                    case "Ingresos" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/ListadoIngresos.fxml",
+                            "Listado de Ingresos"
+                    );
+                    case "Cuentas" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Cuentas.fxml",
+                            "Cuentas bancarias"
+                    );
+
+                    case "Presupuesto" -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                                "Esta sección aún no está implementada.",
+                                ButtonType.OK);
+                        alert.setHeaderText("En desarrollo");
+                        alert.showAndWait();
                     }
-                    case "Gasto" -> System.out.println("Navegar a Añadir Gasto");
-                    case "Ingreso" -> System.out.println("Navegar a Añadir Ingreso");
-                    case "Crear Cuenta" -> System.out.println("Navegar a Crear Cuenta");
-                    case "Presupuesto" -> System.out.println("Navegar a Presupuesto");
+
+                    default -> System.out.println("Acción no implementada aún: " + txt);
                 }
             });
 
@@ -188,10 +207,10 @@ public class MainController {
 
     //CargarNombreCuenta
     private void cargarCuentaDelUsuario() {
-        int idUsuario = Sesion.getUsuarioActual().getIdUsuario(); // ← asegúrate que esto existe
-        cuentaActual = CuentaDAO.obtenerCuentaPorUsuario(idUsuario);
+        cuentaActual = Sesion.getCuentaActual();
 
         if (cuentaActual != null) {
+            cuentaActual.setSaldoInicial(CuentaDAO.obtenerSaldoInicial(cuentaActual.getIdCuenta()));
             tituloCuenta.setText(cuentaActual.getNombre());
         } else {
             tituloCuenta.setText("Cuenta no encontrada");
@@ -259,7 +278,7 @@ public class MainController {
         // El saldo se calcula con todos los años
         double gastosAcumulados = CuentaDAO.obtenerTotalGastosAcumulado(cuentaActual.getIdCuenta());
         double ingresosAcumulados = CuentaDAO.obtenerTotalIngresosAcumulado(cuentaActual.getIdCuenta());
-        double saldo = ingresosAcumulados - gastosAcumulados;
+        double saldo = cuentaActual.getSaldoInicial() + ingresosAcumulados - gastosAcumulados;
 
         // Mostrar formateado
         labelGasto.setText(String.format("%.2f €", totalGastos));

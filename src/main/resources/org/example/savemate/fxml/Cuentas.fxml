@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.example.savemate.controller.CuentasController"
+           stylesheets="@../css/app_main.css">
+
+    <VBox>
+        <!-- Barra superior -->
+        <ToolBar fx:id="topBar" styleClass="toolbar">
+            <JFXHamburger fx:id="hamburger" styleClass="jfx-hamburger"/>
+            <Label fx:id="tituloCuenta" text="Cuenta de Pruebas" styleClass="cuenta-label"/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button fx:id="userButton" onAction="#handleUserIcon" styleClass="user-button"/>
+        </ToolBar>
+
+        <!-- Contenido principal con Scroll -->
+        <VBox alignment="CENTER" spacing="20" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="Tus cuentas" styleClass="info-title-label"/>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                <VBox fx:id="contenedorCuentas" spacing="15">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                </VBox>
+            </ScrollPane>
+
+            <JFXRippler>
+                <StackPane fx:id="botonNuevaCuenta" style="-fx-cursor: hand;"/>
+            </JFXRippler>
+        </VBox>
+    </VBox>
+
+    <JFXDrawer fx:id="drawer"
+               defaultDrawerSize="220"
+               overLayVisible="true"
+               resizableOnDrag="true"
+               mouseTransparent="false"/>
+</StackPane>

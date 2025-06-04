@@ -228,7 +228,38 @@ public class CuentaDAO {
         return ingresos;
     }
 
+    public static List<Cuenta> listarCuentasDeUsuario(int idUsuario) {
+        List<Cuenta> cuentas = new ArrayList<>();
 
+        String query = """
+        SELECT id_cuenta, nombre, banco, saldo_inicial
+        FROM cuenta
+        WHERE id_usuario = ?
+        ORDER BY id_cuenta ASC
+    """;
+
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, idUsuario);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Cuenta cuenta = new Cuenta(
+                        rs.getInt("id_cuenta"),
+                        rs.getString("nombre"),
+                        rs.getString("banco"),
+                        rs.getDouble("saldo_inicial")
+                );
+                cuentas.add(cuenta);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al listar cuentas del usuario: " + e.getMessage());
+        }
+
+        return cuentas;
+    }
 
     public static List<Movimiento> listarMovimientosPorCuenta(int idCuenta) {
         List<Movimiento> movimientos = new ArrayList<>();
@@ -265,6 +296,63 @@ public class CuentaDAO {
         }
 
         return movimientos;
+    }
+
+
+
+    //CRUD CUENTA
+    public static boolean crearCuenta(int idUsuario, String nombre,String banco, double saldoInicial) {
+        String sql = "INSERT INTO cuenta (id_usuario, nombre, banco, saldo_inicial) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            stmt.setString(2, nombre);
+            stmt.setString(3, banco);
+            stmt.setDouble(4, saldoInicial);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("Error al crear cuenta: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static Cuenta obtenerCuentaReciente(int idUsuario) {
+        String sql = """
+        SELECT id_cuenta, nombre, banco, saldo_inicial
+        FROM cuenta
+        WHERE id_usuario = ?
+        ORDER BY id_cuenta DESC
+        LIMIT 1
+    """;
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Cuenta(
+                        rs.getInt("id_cuenta"),
+                        rs.getString("nombre"),
+                        rs.getString("banco"),
+                        rs.getDouble("saldo_inicial")
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error al obtener cuenta reciente: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static double obtenerSaldoInicial(int idCuenta) {
+        String sql = "SELECT saldo_inicial FROM cuenta WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getDouble("saldo_inicial");
+        } catch (Exception e) {
+            System.err.println("Error leyendo saldo inicial: " + e.getMessage());
+        }
+        return 0;
     }
 
 

@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.database.GastoDAO;
 import org.example.savemate.model.Cuenta;
 import org.example.savemate.model.Gasto;
 import org.example.savemate.util.SceneChanger;
@@ -42,7 +43,7 @@ public class ListadoGastosController {
         configurarHamburger();
 
         // Datos usuario y cuenta
-        cuentaActual = CuentaDAO.obtenerCuentaPorUsuario(Sesion.getUsuarioActual().getIdUsuario());
+        cuentaActual = Sesion.getCuentaActual();
         if (cuentaActual != null) {
             tituloCuenta.setText(cuentaActual.getNombre());
         }
@@ -104,16 +105,45 @@ public class ListadoGastosController {
         VBox menu = new VBox(10);
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
-        String[] opciones = {"Inicio", "Añadir Gasto", "Añadir Ingreso", "Crear Cuenta", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
+
         for (String txt : opciones) {
             Button btn = new Button(txt);
-            MainController.styleMenuButton(btn); // si usas el estilo común como static
+            MainController.styleMenuButton(btn);
+
             btn.setOnAction(e -> {
+                Stage ventanaActual = (Stage) tituloCuenta.getScene().getWindow();
                 switch (txt) {
-                    case "Inicio" -> SceneChanger.changeScene((Stage) tituloCuenta.getScene().getWindow(), "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
+                    case "Inicio" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/Main.fxml",
+                            "SaveMate - Principal");
+
+                    case "Gastos" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/ListadoGastos.fxml",
+                            "Listado de Gastos");
+
+                    case "Ingresos" -> SceneChanger.changeScene(ventanaActual,
+                            "/org/example/savemate/fxml/ListadoIngresos.fxml",
+                            "Listado de Ingresos");
+
+                    case "Cuentas" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Cuentas.fxml",
+                            "Cuentas bancarias"
+                    );
+
+                    case "Presupuesto" -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
+                                "Esta sección aún no está implementada.",
+                                ButtonType.OK);
+                        alert.setHeaderText("En desarrollo");
+                        alert.showAndWait();
+                    }
+
                     default -> System.out.println("Acción no implementada aún: " + txt);
                 }
             });
+
             menu.getChildren().add(btn);
         }
 
@@ -135,7 +165,7 @@ public class ListadoGastosController {
         String[] iconos = {
                 "/org/example/savemate/img/boton_editar_24x24.png",
                 "/org/example/savemate/img/anadir_24x24.png",
-                "/org/example/savemate/img/incorrect_24x24.png"
+                "/org/example/savemate/img/tacho_de_reciclaje_24x24.png"
         };
 
         String[] tooltips = {
@@ -153,7 +183,50 @@ public class ListadoGastosController {
             img.setFitHeight(20);
 
             btn.setGraphic(img);
-            Tooltip.install(btn,new Tooltip(tooltips[i]));
+            Tooltip.install(btn, new Tooltip(tooltips[i]));
+
+            final int index = i;
+            btn.setOnAction(e -> {
+                Gasto seleccionado = tablaGastos.getSelectionModel().getSelectedItem();
+
+                switch (index) {
+                    case 0: // Editar
+                        if (seleccionado == null) {
+                            mostrarAlerta("Selecciona un gasto para editar.");
+                            return;
+                        }
+                        SceneChanger.openFXMLPopup("/org/example/savemate/fxml/GastoForm.fxml", "Editar Gasto", (controller, stage) -> {
+                            ((GastoFormController) controller).initData(stage, cuentaActual.getIdCuenta(), seleccionado);
+                            Stage ventanaPrincipal = (Stage) tablaGastos.getScene().getWindow();
+                            stage.initOwner(ventanaPrincipal);
+                            stage.setOnHiding(ev -> recargarTabla());
+                        });
+                        break;
+
+                    case 1: // Añadir
+                        SceneChanger.openFXMLPopup("/org/example/savemate/fxml/GastoForm.fxml", "Nuevo Gasto", (controller, stage) -> {
+                            ((GastoFormController) controller).initData(stage, cuentaActual.getIdCuenta(), null);
+                            Stage ventanaPrincipal = (Stage) tablaGastos.getScene().getWindow();
+                            stage.initOwner(ventanaPrincipal);
+                            stage.setOnHiding(ev -> recargarTabla());
+                        });
+                        break;
+
+                    case 2: // Eliminar
+                        if (seleccionado == null) {
+                            mostrarAlerta("Selecciona un gasto para eliminar.");
+                            return;
+                        }
+                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar gasto seleccionado?", ButtonType.YES, ButtonType.NO);
+                        confirm.showAndWait().ifPresent(resp -> {
+                            if (resp == ButtonType.YES) {
+                                GastoDAO.eliminarGasto(seleccionado.getIdGasto());
+                                recargarTabla();
+                            }
+                        });
+                        break;
+                }
+            });
 
             crudButtonBox.getChildren().add(btn);
         }
@@ -176,5 +249,14 @@ public class ListadoGastosController {
                     stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
                     stage.setAlwaysOnTop(true); // opcional, para que siempre esté al frente
                 });
+    }
+
+    private void mostrarAlerta(String msg) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK);
+        alert.showAndWait();
+    }
+    private void recargarTabla() {
+        List<Gasto> gastos = CuentaDAO.listarGastosPorCuenta(cuentaActual.getIdCuenta());
+        tablaGastos.getItems().setAll(gastos);
     }
 }

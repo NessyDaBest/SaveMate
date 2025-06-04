@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.savemate.controller.GastoFormController"
+            stylesheets="@../css/app_main.css">
+    <children>
+        <VBox alignment="CENTER" spacing="12"
+              style="-fx-padding: 20;"
+              maxWidth="300"
+              AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
+              AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+
+            <Label text="Gasto" styleClass="info-title-label"/>
+
+            <TextField fx:id="campoMonto" promptText="Monto" />
+            <DatePicker fx:id="campoFecha" />
+            <TextArea fx:id="campoDescripcion" promptText="Descripción (máx. 50 caracteres)"
+                      prefRowCount="3" wrapText="true" />
+
+            <HBox spacing="10">
+                <Button fx:id="btnAceptar" text="Aceptar" />
+                <Button fx:id="btnCancelar" text="Cancelar" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -48,6 +48,15 @@ public class CuentasController {
         configurarHamburger();
         initDrawerContent();
 
+        //titulo de cuenta clicable
+        tituloCuenta.setOnMouseClicked(e -> {
+            SceneChanger.changeScene(
+                    (Stage) tituloCuenta.getScene().getWindow(),
+                    "/org/example/savemate/fxml/Cuentas.fxml",
+                    "Cuentas bancarias"
+            );
+        });
+
         ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/cuenta_24x24.png")));
         icon.setFitWidth(20);
         icon.setFitHeight(20);
@@ -109,9 +118,42 @@ public class CuentasController {
             btnEditar.setGraphic(iconEditar);
             btnEditar.getStyleClass().add("user-button");
 
+            btnEditar.setOnAction(e -> {
+                Stage mainStage = (Stage) contenedorCuentas.getScene().getWindow();
+                SceneChanger.openFXMLPopup("/org/example/savemate/fxml/EditarCuenta.fxml", "Editar Cuenta", (controller, stage) -> {
+                    EditarCuentaController c = (EditarCuentaController) controller;
+                    c.initData(cuenta);
+                    stage.initOwner(mainStage);
+                    stage.setResizable(false);
+                    stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                    stage.setAlwaysOnTop(true);
+                });
+            });
+
             Button btnEliminar = new Button();
             btnEliminar.setGraphic(iconEliminar);
             btnEliminar.getStyleClass().add("user-button");
+
+            btnEliminar.setOnAction(e -> {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Deseas eliminar esta cuenta?", ButtonType.YES, ButtonType.NO);
+                confirm.setHeaderText("Confirmar eliminación");
+                confirm.initOwner(contenedorCuentas.getScene().getWindow());
+                confirm.showAndWait().ifPresent(resp -> {
+                    if (resp == ButtonType.YES) {
+                        boolean eliminado = CuentaDAO.eliminarCuenta(cuenta.getIdCuenta());
+                        if (eliminado) {
+                            SceneChanger.changeScene(
+                                    (Stage) contenedorCuentas.getScene().getWindow(),
+                                    "/org/example/savemate/fxml/Cuentas.fxml",
+                                    "Cuentas bancarias"
+                            );
+                        } else {
+                            Alert err = new Alert(Alert.AlertType.ERROR, "No se pudo eliminar la cuenta.");
+                            err.showAndWait();
+                        }
+                    }
+                });
+            });
 
             fila.getChildren().addAll(nombre, btnEditar, btnEliminar);
 

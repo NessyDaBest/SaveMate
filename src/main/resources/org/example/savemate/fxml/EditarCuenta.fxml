@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.example.savemate.controller.EditarCuentaController">
+    <VBox spacing="20" alignment="CENTER" maxWidth="300">
+        <padding>
+            <Insets top="20" right="25" bottom="20" left="25"/>
+        </padding>
+
+        <Label text="Editar nombre de cuenta" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+
+        <TextField fx:id="campoNombre" promptText="Nuevo nombre"/>
+
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Cancelar" onAction="#handleCancelar"/>
+            <Button text="Guardar cambios" onAction="#handleGuardar"/>
+        </HBox>
+    </VBox>
+</StackPane>

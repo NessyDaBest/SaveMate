@@ -44,6 +44,15 @@ public class MainController {
         cargarCuentaDelUsuario();
         configurarFiltroPorAño();
 
+        //titulo de cuenta clicable
+        tituloCuenta.setOnMouseClicked(e -> {
+            SceneChanger.changeScene(
+                    (Stage) tituloCuenta.getScene().getWindow(),
+                    "/org/example/savemate/fxml/Cuentas.fxml",
+                    "Cuentas bancarias"
+            );
+        });
+
         // Animación del botón hamburguesa
         transition = new HamburgerSlideCloseTransition(hamburger);
         transition.setRate(-1);

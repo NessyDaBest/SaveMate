@@ -43,6 +43,15 @@ public class ListadoIngresosController {
         initDrawerContent();
         configurarHamburger();
 
+        //titulo de cuenta clicable
+        tituloCuenta.setOnMouseClicked(e -> {
+            SceneChanger.changeScene(
+                    (Stage) tituloCuenta.getScene().getWindow(),
+                    "/org/example/savemate/fxml/Cuentas.fxml",
+                    "Cuentas bancarias"
+            );
+        });
+
         // Datos usuario y cuenta
         cuentaActual = Sesion.getCuentaActual();
         if (cuentaActual != null) {

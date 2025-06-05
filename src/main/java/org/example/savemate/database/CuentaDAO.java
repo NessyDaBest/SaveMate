@@ -354,6 +354,33 @@ public class CuentaDAO {
         }
         return 0;
     }
+    public static boolean actualizarNombreCuenta(int idCuenta, String nuevoNombre) {
+        String sql = "UPDATE cuenta SET nombre = ? WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            stmt.setString(1, nuevoNombre);
+            stmt.setInt(2, idCuenta);
+            return stmt.executeUpdate() == 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean eliminarCuenta(int idCuenta) {
+        String sql = "DELETE FROM cuenta WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            return stmt.executeUpdate() == 1;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

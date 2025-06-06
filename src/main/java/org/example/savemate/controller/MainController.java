@@ -2,6 +2,7 @@ package org.example.savemate.controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +14,7 @@ import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.transitions.hamburger.HamburgerSlideCloseTransition;
 
 import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.database.PresupuestoDAO;
 import org.example.savemate.model.Cuenta;
 import org.example.savemate.util.SceneChanger;
 import org.example.savemate.util.Sesion;
@@ -21,6 +23,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainController {
 
@@ -33,6 +36,7 @@ public class MainController {
     @FXML private Label labelSaldo;
     @FXML private BarChart<String, Number> gastoMensualChart;
     @FXML private ComboBox<String> añoComboBox;
+    @FXML private Label labelExcesos;
 
     private HamburgerSlideCloseTransition transition;
     private Cuenta cuentaActual;
@@ -42,7 +46,7 @@ public class MainController {
         //tituloCuenta.setText("Cuenta Ahorros");
         // Obtener y mostrar cuenta del usuario
         cargarCuentaDelUsuario();
-        configurarFiltroPorAño();
+        configurarFiltroPorAnio();
 
         //titulo de cuenta clicable
         tituloCuenta.setOnMouseClicked(e -> {
@@ -133,7 +137,7 @@ public class MainController {
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
         // Lista de opciones del drawer
-        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Limites"};
 
         for (String txt : opciones) {
             Button btn = new Button(txt);
@@ -166,13 +170,11 @@ public class MainController {
                             "Cuentas bancarias"
                     );
 
-                    case "Presupuesto" -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                                "Esta sección aún no está implementada.",
-                                ButtonType.OK);
-                        alert.setHeaderText("En desarrollo");
-                        alert.showAndWait();
-                    }
+                    case "Limites" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Presupuesto.fxml",
+                            "Límites bancarios"
+                    );
 
                     default -> System.out.println("Acción no implementada aún: " + txt);
                 }
@@ -226,15 +228,33 @@ public class MainController {
         }
     }
     //Combo box para el filtro por año
-    private void configurarFiltroPorAño() {
+    private void configurarFiltroPorAnio() {
         int añoActual = java.time.Year.now().getValue();
 
-        // Rango de años desde 2022 hasta el año actual
-        for (int año = 2022; año <= añoActual; año++) {
+        int minGasto = CuentaDAO.obtenerMinAñoGastos(cuentaActual.getIdCuenta());
+        int maxGasto = CuentaDAO.obtenerMaxAñoGastos(cuentaActual.getIdCuenta());
+        int minIngreso = CuentaDAO.obtenerMinAñoIngresos(cuentaActual.getIdCuenta());
+        int maxIngreso = CuentaDAO.obtenerMaxAñoIngresos(cuentaActual.getIdCuenta());
+
+        int minYear = Math.min(
+                minGasto == 0 ? añoActual : minGasto,
+                minIngreso == 0 ? añoActual : minIngreso
+        );
+        int maxYear = Math.max(
+                maxGasto == 0 ? añoActual : maxGasto,
+                maxIngreso == 0 ? añoActual : maxIngreso
+        );
+
+        // Seguridad: si la cuenta no tiene nada, mostrar al menos 2022..añoActual
+        minYear = Math.min(minYear, 2022);
+        maxYear = Math.max(maxYear, añoActual);
+
+        añoComboBox.getItems().clear();
+        for (int año = minYear; año <= maxYear; año++) {
             añoComboBox.getItems().add(String.valueOf(año));
         }
 
-        añoComboBox.setValue(String.valueOf(añoActual)); // Año seleccionado por defecto
+        añoComboBox.setValue(String.valueOf(maxYear)); // Por defecto el más reciente
 
         añoComboBox.setOnAction(e -> {
             loadMonto(); // Recarga el gráfico con el año nuevo
@@ -247,56 +267,74 @@ public class MainController {
         int añoSeleccionado = Integer.parseInt(añoComboBox.getValue());
         Map<Integer, Double> gastosPorMes = CuentaDAO.obtenerGastosMensuales(cuentaActual.getIdCuenta(), añoSeleccionado);
         Map<Integer, Double> ingresosPorMes = CuentaDAO.obtenerIngresosMensuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        Map<Integer, Double> limitesPorMes = PresupuestoDAO.obtenerPresupuestosPorCuentaYAño(cuentaActual.getIdCuenta(), añoSeleccionado);
 
         XYChart.Series<String, Number> gastosSeries = new XYChart.Series<>();
-        gastosSeries.setName("Gastos");
-
         XYChart.Series<String, Number> ingresosSeries = new XYChart.Series<>();
+
+        gastosSeries.setName("Gastos");
         ingresosSeries.setName("Ingresos");
 
+        AtomicInteger totalExcesos = new AtomicInteger(0);
         for (int i = 1; i <= 12; i++) {
-            String mes = String.valueOf(i);
+            final int mesIndex = i;
+            String mes = String.valueOf(mesIndex);
+            double gasto = gastosPorMes.getOrDefault(mesIndex, 0.0);
+            double ingreso = ingresosPorMes.getOrDefault(mesIndex, 0.0);
+            Double limite = limitesPorMes.get(mesIndex); // null si no hay límite
 
-            // Gastos
-            double gasto = gastosPorMes.getOrDefault(i, 0.0);
-            XYChart.Data<String, Number> dataGasto = new XYChart.Data<>(mes, gasto);
+            final double gastoFinal = gasto;
+            final Double limiteFinal = limite; // puede ser null
+
+            // GASTOS
+            XYChart.Data<String, Number> dataGasto = new XYChart.Data<>(mes, gastoFinal);
             gastosSeries.getData().add(dataGasto);
-            Tooltip tooltipGasto = new Tooltip("Gasto Mes " + i + ": " + String.format("%.2f", gasto) + " €");
             dataGasto.nodeProperty().addListener((obs, oldNode, newNode) -> {
                 if (newNode != null) {
-                    newNode.setStyle("-fx-bar-fill: #C73C31;"); // rojo
-                    Tooltip.install(newNode, tooltipGasto);
+                    boolean excede = limiteFinal != null && gastoFinal > limiteFinal;
+                    String color = excede ? "#8B0000" : "#C75B5B";
+                    newNode.setStyle("-fx-bar-fill: " + color + ";");
+
+                    String textoTooltip = "Gasto Mes " + mesIndex + ": " + String.format("%.2f", gastoFinal) + " €";
+                    if (limiteFinal != null) {
+                        textoTooltip += "\nLímite: " + String.format("%.2f", limiteFinal) + " €";
+                        if (excede) {
+                            textoTooltip += "\n¡Excede el límite por " + String.format("%.2f", gastoFinal - limiteFinal) + " €!";
+                        }
+                    }
+                    if (limiteFinal != null && gastoFinal > limiteFinal) {
+                        totalExcesos.incrementAndGet();
+                    }
+                    Tooltip.install(newNode, new Tooltip(textoTooltip));
                 }
             });
 
-            // Ingresos
-            double ingreso = ingresosPorMes.getOrDefault(i, 0.0);
+            // INGRESOS
             XYChart.Data<String, Number> dataIngreso = new XYChart.Data<>(mes, ingreso);
             ingresosSeries.getData().add(dataIngreso);
-            Tooltip tooltipIngreso = new Tooltip("Ingreso Mes " + i + ": " + String.format("%.2f", ingreso) + " €");
             dataIngreso.nodeProperty().addListener((obs, oldNode, newNode) -> {
                 if (newNode != null) {
-                    newNode.setStyle("-fx-bar-fill: #75BB8B;"); // verde
-                    Tooltip.install(newNode, tooltipIngreso);
+                    newNode.setStyle("-fx-bar-fill: #75BB8B;");
+                    Tooltip.install(newNode, new Tooltip("Ingreso Mes " + mesIndex + ": " + String.format("%.2f", ingreso) + " €"));
                 }
             });
         }
-        // Obtener totales y actualizar labels
-        double totalGastos = CuentaDAO.obtenerTotalGastosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
-        double totalIngresos = CuentaDAO.obtenerTotalIngresosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
-        // El saldo se calcula con todos los años
-        double gastosAcumulados = CuentaDAO.obtenerTotalGastosAcumulado(cuentaActual.getIdCuenta());
-        double ingresosAcumulados = CuentaDAO.obtenerTotalIngresosAcumulado(cuentaActual.getIdCuenta());
-        double saldo = cuentaActual.getSaldoInicial() + ingresosAcumulados - gastosAcumulados;
-
-        // Mostrar formateado
-        labelGasto.setText(String.format("%.2f €", totalGastos));
-        labelIngreso.setText(String.format("%.2f €", totalIngresos));
-        labelSaldo.setText(String.format("%.2f €", saldo));
 
         gastoMensualChart.getData().clear();
         gastoMensualChart.getData().addAll(gastosSeries, ingresosSeries);
         gastoMensualChart.setLegendVisible(false);
+
+        // Totales
+        double totalGastos = CuentaDAO.obtenerTotalGastosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        double totalIngresos = CuentaDAO.obtenerTotalIngresosAnuales(cuentaActual.getIdCuenta(), añoSeleccionado);
+        double gastosAcumulados = CuentaDAO.obtenerTotalGastosAcumulado(cuentaActual.getIdCuenta());
+        double ingresosAcumulados = CuentaDAO.obtenerTotalIngresosAcumulado(cuentaActual.getIdCuenta());
+        double saldo = cuentaActual.getSaldoInicial() + ingresosAcumulados - gastosAcumulados;
+
+        labelGasto.setText(String.format("%.2f €", totalGastos));
+        labelIngreso.setText(String.format("%.2f €", totalIngresos));
+        labelSaldo.setText(String.format("%.2f €", saldo));
+        labelExcesos.setText(String.valueOf(totalExcesos));
     }
 
     @FXML
@@ -344,6 +382,14 @@ public class MainController {
                 (Stage) tituloCuenta.getScene().getWindow(),
                 "/org/example/savemate/fxml/ListadoMovimientos.fxml",
                 "Listado de Movimientos"
+        );
+    }
+    @FXML
+    private void onLimitesExcedidosClick() {
+        SceneChanger.changeScene(
+                (Stage) tituloCuenta.getScene().getWindow(),
+                "/org/example/savemate/fxml/Presupuesto.fxml",
+                "Límites bancarios"
         );
     }
 }

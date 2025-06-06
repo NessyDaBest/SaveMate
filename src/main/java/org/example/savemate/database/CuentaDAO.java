@@ -383,4 +383,72 @@ public class CuentaDAO {
         }
     }
 
+    // Obtener el año mínimo de gastos
+    public static int obtenerMinAñoGastos(int idCuenta) {
+        String sql = "SELECT COALESCE(MIN(EXTRACT(YEAR FROM fecha)), 0) FROM gasto WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return (int) rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo min año gastos: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    // Obtener el año máximo de gastos
+    public static int obtenerMaxAñoGastos(int idCuenta) {
+        String sql = "SELECT COALESCE(MAX(EXTRACT(YEAR FROM fecha)), 0) FROM gasto WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return (int) rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo max año gastos: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    // Obtener el año mínimo de ingresos
+    public static int obtenerMinAñoIngresos(int idCuenta) {
+        String sql = "SELECT COALESCE(MIN(EXTRACT(YEAR FROM fecha)), 0) FROM ingreso WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return (int) rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo min año ingresos: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    // Obtener el año máximo de ingresos
+    public static int obtenerMaxAñoIngresos(int idCuenta) {
+        String sql = "SELECT COALESCE(MAX(EXTRACT(YEAR FROM fecha)), 0) FROM ingreso WHERE id_cuenta = ?";
+        try (Connection conn = DatabaseConnector.connect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idCuenta);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return (int) rs.getDouble(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Error obteniendo max año ingresos: " + e.getMessage());
+        }
+        return 0;
+    }
+
 }

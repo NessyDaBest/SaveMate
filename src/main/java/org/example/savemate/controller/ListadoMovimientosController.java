@@ -42,6 +42,15 @@ public class ListadoMovimientosController {
         initDrawerContent();
         configurarHamburger();
 
+        cuentaActual = Sesion.getCuentaActual();
+        if (cuentaActual == null) {
+            // No hay cuenta
+            tituloCuenta.setText("Cuenta no encontrada");
+            tablaMovimientos.setDisable(true);
+            Platform.runLater(() -> mostrarAlerta("No tienes ninguna cuenta creada. Ve a la sección Cuentas para crear una."));
+            return;
+        }
+
         //titulo de cuenta clicable
         tituloCuenta.setOnMouseClicked(e -> {
             SceneChanger.changeScene(
@@ -135,7 +144,7 @@ public class ListadoMovimientosController {
         VBox menu = new VBox(10);
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
-        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Limites"};
 
         for (String txt : opciones) {
             Button btn = new Button(txt);
@@ -162,13 +171,11 @@ public class ListadoMovimientosController {
                             "Cuentas bancarias"
                     );
 
-                    case "Presupuesto" -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                                "Esta sección aún no está implementada.",
-                                ButtonType.OK);
-                        alert.setHeaderText("En desarrollo");
-                        alert.showAndWait();
-                    }
+                    case "Limites" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Presupuesto.fxml",
+                            "Límites bancarios"
+                    );
 
                     default -> System.out.println("Acción no implementada aún: " + txt);
                 }
@@ -240,5 +247,10 @@ public class ListadoMovimientosController {
                     stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
                     stage.setAlwaysOnTop(true); // opcional, para que siempre esté al frente
                 });
+    }
+
+    private void mostrarAlerta(String msg) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK);
+        alert.showAndWait();
     }
 }

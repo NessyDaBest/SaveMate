@@ -60,6 +60,15 @@
                         </VBox>
                     </StackPane>
                 </JFXRippler>
+
+                <JFXRippler onMouseClicked="#onLimitesExcedidosClick">
+                    <StackPane styleClass="resumen-card">
+                        <VBox alignment="CENTER" spacing="5">
+                            <Label text="Límites excedidos" styleClass="resumen-label" />
+                            <Label fx:id="labelExcesos" text="0" styleClass="resumen-value-gasto" />
+                        </VBox>
+                    </StackPane>
+                </JFXRippler>
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 0 20 0 20;">

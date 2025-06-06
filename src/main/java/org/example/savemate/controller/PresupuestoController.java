@@ -1,8 +1,6 @@
 package org.example.savemate.controller;
 
-import com.jfoenix.controls.JFXDrawer;
-import com.jfoenix.controls.JFXHamburger;
-import com.jfoenix.controls.JFXRippler;
+import com.jfoenix.controls.*;
 import com.jfoenix.transitions.hamburger.HamburgerSlideCloseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,42 +9,75 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.database.PresupuestoDAO;
 import org.example.savemate.model.Cuenta;
+import org.example.savemate.model.Presupuesto;
 import org.example.savemate.util.SceneChanger;
 import org.example.savemate.util.Sesion;
 
+import java.time.Month;
 import java.util.List;
 
-public class CuentasController {
+public class PresupuestoController {
 
     @FXML private Label tituloCuenta;
     @FXML private Button userButton;
     @FXML private JFXDrawer drawer;
     @FXML private JFXHamburger hamburger;
-    @FXML private VBox contenedorCuentas;
-    @FXML private StackPane botonNuevaCuenta;
+    @FXML private VBox contenedorPresupuestos;
+    @FXML private StackPane botonNuevoPresupuesto;
+    private Cuenta cuentaActual;
 
     private HamburgerSlideCloseTransition transition;
 
     @FXML
     public void initialize() {
-        //Icono de añadir
+        configurarHamburger();
+        initDrawerContent();
+
+        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/cuenta_24x24.png")));
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        userButton.setGraphic(icon);
+
+        botonNuevoPresupuesto.getStyleClass().add("boton-anadir-cuenta");
         ImageView iconoMas = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/anadir_32x32.png")));
         iconoMas.setFitWidth(28);
         iconoMas.setFitHeight(28);
+        botonNuevoPresupuesto.getChildren().add(iconoMas);
 
-        // Aplicar estilo al StackPane para que se vea como los demás
-        botonNuevaCuenta.getStyleClass().add("boton-anadir-cuenta");
+        botonNuevoPresupuesto.setOnMouseClicked(e -> {
+            Stage mainStage = (Stage) botonNuevoPresupuesto.getScene().getWindow();
+            final boolean[] presupuestoCreado = {false};
 
-        botonNuevaCuenta.getChildren().add(iconoMas);
+            SceneChanger.openFXMLPopup("/org/example/savemate/fxml/CrearPresupuesto.fxml", "Nuevo Presupuesto", (controller, modalStage) -> {
+                CrearPresupuestoController c = (CrearPresupuestoController) controller;
+                c.setOnPresupuestoCreado(() -> presupuestoCreado[0] = true);
 
-        // Nombre de cuenta en la barra superior
-        Cuenta actual = CuentaDAO.obtenerCuentaPorUsuario(Sesion.getUsuarioActual().getIdUsuario());
-        tituloCuenta.setText(actual != null ? actual.getNombre() : "Mis cuentas");
+                modalStage.initOwner(mainStage);
+                modalStage.setResizable(false);
+                modalStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
+                modalStage.setAlwaysOnTop(true);
 
-        configurarHamburger();
-        initDrawerContent();
+                modalStage.setOnHiding(ev -> {
+                    if (presupuestoCreado[0]) {
+                        SceneChanger.changeScene(mainStage, "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
+                    }
+                });
+            });
+        });
+
+        // === Aquí va el control de cuenta ===
+        cuentaActual = Sesion.getCuentaActual();
+        if (cuentaActual == null) {
+            tituloCuenta.setText("Cuenta no encontrada");
+            contenedorPresupuestos.setDisable(true);
+            botonNuevoPresupuesto.setDisable(true);
+            Platform.runLater(() -> mostrarAlerta("No tienes ninguna cuenta creada. Ve a la sección Cuentas para crear una."));
+            return;
+        }
+
+        tituloCuenta.setText(cuentaActual.getNombre());
 
         //titulo de cuenta clicable
         tituloCuenta.setOnMouseClicked(e -> {
@@ -57,72 +88,42 @@ public class CuentasController {
             );
         });
 
-        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/cuenta_24x24.png")));
-        icon.setFitWidth(20);
-        icon.setFitHeight(20);
-        userButton.setGraphic(icon);
-
-        botonNuevaCuenta.setOnMouseClicked(e -> {
-            Stage mainStage = (Stage) botonNuevaCuenta.getScene().getWindow();
-            SceneChanger.openFXMLPopup("/org/example/savemate/fxml/CrearCuenta.fxml", "Nueva Cuenta", (controller, modalStage) -> {
-                modalStage.initOwner(mainStage);
-                modalStage.setResizable(false);
-                modalStage.initModality(javafx.stage.Modality.WINDOW_MODAL);
-                modalStage.setAlwaysOnTop(true);
-
-                // Al cerrar con la X, actualiza directamente la escena
-                modalStage.setOnHiding(ev -> {
-                    Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setHeaderText("Información");
-                        alert.setContentText("Cuenta creada con éxito.");
-                        alert.initOwner(mainStage); // muy importante para que se muestre por delante
-                        alert.showAndWait();
-
-                        SceneChanger.changeScene(
-                                mainStage,
-                                "/org/example/savemate/fxml/Cuentas.fxml",
-                                "Cuentas bancarias"
-                        );
-                    });
-                });
-            });
-        });
-
-        cargarCuentas();
+        cargarPresupuestos();
     }
 
-    private void cargarCuentas() {
-        contenedorCuentas.getChildren().clear();
+    private void cargarPresupuestos() {
+        contenedorPresupuestos.getChildren().clear();
+        int idCuenta = Sesion.getCuentaActual().getIdCuenta();
+        List<Presupuesto> presupuestos = PresupuestoDAO.obtenerPresupuestosPorCuenta(idCuenta);
 
-        List<Cuenta> cuentas = CuentaDAO.listarCuentasDeUsuario(Sesion.getUsuarioActual().getIdUsuario());
-
-        for (Cuenta cuenta : cuentas) {
+        for (Presupuesto p : presupuestos) {
             HBox fila = new HBox(10);
             fila.getStyleClass().add("cuenta-item");
-            fila.setPrefWidth(300);
             fila.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            fila.setMaxWidth(320);
 
-            Label nombre = new Label(cuenta.getNombre());
+            Label nombre = new Label("Límite");
+            Label mes = new Label(Month.of(p.getMes()).name().substring(0, 1) + Month.of(p.getMes()).name().substring(1).toLowerCase());
+            Label año = new Label(String.valueOf(p.getAnio()));
+
             nombre.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+            mes.setStyle("-fx-font-size: 13px;");
+            año.setStyle("-fx-font-size: 13px;");
+
             HBox.setHgrow(nombre, Priority.ALWAYS);
 
+            Button btnEditar = new Button();
             ImageView iconEditar = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/boton_editar_24x24.png")));
-            ImageView iconEliminar = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/tacho_de_reciclaje_24x24.png")));
             iconEditar.setFitWidth(20);
             iconEditar.setFitHeight(20);
-            iconEliminar.setFitWidth(20);
-            iconEliminar.setFitHeight(20);
-
-            Button btnEditar = new Button();
             btnEditar.setGraphic(iconEditar);
             btnEditar.getStyleClass().add("user-button");
 
             btnEditar.setOnAction(e -> {
-                Stage mainStage = (Stage) contenedorCuentas.getScene().getWindow();
-                SceneChanger.openFXMLPopup("/org/example/savemate/fxml/EditarCuenta.fxml", "Editar Cuenta", (controller, stage) -> {
-                    EditarCuentaController c = (EditarCuentaController) controller;
-                    c.initData(cuenta);
+                Stage mainStage = (Stage) contenedorPresupuestos.getScene().getWindow();
+                SceneChanger.openFXMLPopup("/org/example/savemate/fxml/EditarPresupuesto.fxml", "Editar Presupuesto", (controller, stage) -> {
+                    EditarPresupuestoController c = (EditarPresupuestoController) controller;
+                    c.initData(p);
                     stage.initOwner(mainStage);
                     stage.setResizable(false);
                     stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
@@ -131,47 +132,26 @@ public class CuentasController {
             });
 
             Button btnEliminar = new Button();
+            ImageView iconEliminar = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/tacho_de_reciclaje_24x24.png")));
+            iconEliminar.setFitWidth(20);
+            iconEliminar.setFitHeight(20);
             btnEliminar.setGraphic(iconEliminar);
             btnEliminar.getStyleClass().add("user-button");
 
             btnEliminar.setOnAction(e -> {
-                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Deseas eliminar esta cuenta?", ButtonType.YES, ButtonType.NO);
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Eliminar este presupuesto?", ButtonType.YES, ButtonType.NO);
                 confirm.setHeaderText("Confirmar eliminación");
-                confirm.initOwner(contenedorCuentas.getScene().getWindow());
+                confirm.initOwner(contenedorPresupuestos.getScene().getWindow());
                 confirm.showAndWait().ifPresent(resp -> {
                     if (resp == ButtonType.YES) {
-                        boolean eliminado = CuentaDAO.eliminarCuenta(cuenta.getIdCuenta());
-                        if (eliminado) {
-                            SceneChanger.changeScene(
-                                    (Stage) contenedorCuentas.getScene().getWindow(),
-                                    "/org/example/savemate/fxml/Cuentas.fxml",
-                                    "Cuentas bancarias"
-                            );
-                        } else {
-                            Alert err = new Alert(Alert.AlertType.ERROR, "No se pudo eliminar la cuenta.");
-                            err.showAndWait();
-                        }
+                        PresupuestoDAO.eliminarPresupuesto(p.getIdPresupuesto());
+                        SceneChanger.changeScene((Stage) contenedorPresupuestos.getScene().getWindow(), "/org/example/savemate/fxml/Presupuesto.fxml", "Presupuestos");
                     }
                 });
             });
 
-            fila.getChildren().addAll(nombre, btnEditar, btnEliminar);
-
-            JFXRippler rippler = new JFXRippler(fila);
-            rippler.setStyle("-fx-alignment: center;");
-            Tooltip.install(rippler, new Tooltip("Hacer clic para seleccionar esta cuenta"));
-
-            // Evento de clic: cambia de cuenta y redirige la ventana de cuentas
-            rippler.setOnMouseClicked(e -> {
-                Sesion.setCuentaActual(cuenta);
-                SceneChanger.changeScene(
-                        (Stage) contenedorCuentas.getScene().getWindow(),
-                        "/org/example/savemate/fxml/Main.fxml",
-                        "SaveMate - Principal"
-                );
-            });
-
-            contenedorCuentas.getChildren().add(rippler);
+            fila.getChildren().addAll(nombre, mes, año, btnEditar, btnEliminar);
+            contenedorPresupuestos.getChildren().add(fila);
         }
     }
 
@@ -197,7 +177,6 @@ public class CuentasController {
                 transition.setRate(-1);
                 transition.play();
             }
-
             Platform.runLater(() -> {
                 drawer.requestLayout();
                 drawer.applyCss();
@@ -205,32 +184,6 @@ public class CuentasController {
         });
 
         drawer.setOverLayVisible(true);
-    }
-
-    private void initDrawerContent() {
-        VBox menu = new VBox(10);
-        menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
-
-        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Limites"};
-        for (String txt : opciones) {
-            Button btn = new Button(txt);
-            MainController.styleMenuButton(btn);
-
-            btn.setOnAction(e -> {
-                Stage actual = (Stage) tituloCuenta.getScene().getWindow();
-                switch (txt) {
-                    case "Inicio" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
-                    case "Gastos" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/ListadoGastos.fxml", "Listado de Gastos");
-                    case "Ingresos" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/ListadoIngresos.fxml", "Listado de Ingresos");
-                    case "Cuentas" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Cuentas.fxml", "Cuentas Bancarias");
-                    case "Limites" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Presupuesto.fxml", "Límites bancarios");
-                }
-            });
-
-            menu.getChildren().add(btn);
-        }
-
-        drawer.setSidePane(menu);
     }
 
     public void postInitialize(Stage stage) {
@@ -243,12 +196,33 @@ public class CuentasController {
         userButton.toFront();
     }
 
+    private void initDrawerContent() {
+        VBox menu = new VBox(10);
+        menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Limites"};
+        for (String txt : opciones) {
+            Button btn = new Button(txt);
+            MainController.styleMenuButton(btn);
+            btn.setOnAction(e -> {
+                Stage actual = (Stage) tituloCuenta.getScene().getWindow();
+                switch (txt) {
+                    case "Inicio" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Main.fxml", "SaveMate - Principal");
+                    case "Gastos" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/ListadoGastos.fxml", "Listado de Gastos");
+                    case "Ingresos" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/ListadoIngresos.fxml", "Listado de Ingresos");
+                    case "Cuentas" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Cuentas.fxml", "Cuentas bancarias");
+                    case "Limites" -> SceneChanger.changeScene(actual, "/org/example/savemate/fxml/Presupuesto.fxml", "Límites bancarios");
+                }
+            });
+            menu.getChildren().add(btn);
+        }
+        drawer.setSidePane(menu);
+    }
+
     @FXML
     private void handleUserIcon() {
         Stage mainStage = (Stage) tituloCuenta.getScene().getWindow();
         String nombre = Sesion.getUsuarioActual().getNombre();
         String email = Sesion.getUsuarioActual().getEmail();
-
         SceneChanger.openFXMLPopup("/org/example/savemate/fxml/UserInfo.fxml", "Cuenta Iniciada", (controller, stage) -> {
             UserInfoController c = (UserInfoController) controller;
             c.initData(stage, mainStage, nombre, email);
@@ -257,5 +231,10 @@ public class CuentasController {
             stage.initModality(javafx.stage.Modality.WINDOW_MODAL);
             stage.setAlwaysOnTop(true);
         });
+    }
+
+    private void mostrarAlerta(String msg) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK);
+        alert.showAndWait();
     }
 }

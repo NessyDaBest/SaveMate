@@ -10,8 +10,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.savemate.database.CuentaDAO;
+import org.example.savemate.database.GastoDAO;
 import org.example.savemate.database.IngresoDAO;
 import org.example.savemate.model.Cuenta;
 import org.example.savemate.model.Gasto;
@@ -19,6 +21,10 @@ import org.example.savemate.model.Ingreso;
 import org.example.savemate.util.SceneChanger;
 import org.example.savemate.util.Sesion;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,6 +48,16 @@ public class ListadoIngresosController {
     public void initialize() {
         initDrawerContent();
         configurarHamburger();
+
+        cuentaActual = Sesion.getCuentaActual();
+        if (cuentaActual == null) {
+            // No hay cuenta
+            tituloCuenta.setText("Cuenta no encontrada");
+            tablaIngresos.setDisable(true);
+            crudButtonBox.setDisable(true);
+            Platform.runLater(() -> mostrarAlerta("No tienes ninguna cuenta creada. Ve a la sección Cuentas para crear una."));
+            return;
+        }
 
         //titulo de cuenta clicable
         tituloCuenta.setOnMouseClicked(e -> {
@@ -115,7 +131,7 @@ public class ListadoIngresosController {
         VBox menu = new VBox(10);
         menu.setStyle("-fx-padding: 10; -fx-background-color: white;");
 
-        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Presupuesto"};
+        String[] opciones = {"Inicio", "Gastos", "Ingresos", "Cuentas", "Limites"};
 
         for (String txt : opciones) {
             Button btn = new Button(txt);
@@ -142,13 +158,11 @@ public class ListadoIngresosController {
                             "Cuentas bancarias"
                     );
 
-                    case "Presupuesto" -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                                "Esta sección aún no está implementada.",
-                                ButtonType.OK);
-                        alert.setHeaderText("En desarrollo");
-                        alert.showAndWait();
-                    }
+                    case "Limites" -> SceneChanger.changeScene(
+                            ventanaActual,
+                            "/org/example/savemate/fxml/Presupuesto.fxml",
+                            "Límites bancarios"
+                    );
 
                     default -> System.out.println("Acción no implementada aún: " + txt);
                 }
@@ -170,6 +184,46 @@ public class ListadoIngresosController {
         userButton.toFront();
     }
 
+    private void importarIngresosDesdeCSV() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Selecciona un archivo CSV");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+
+        Stage stage = (Stage) tablaIngresos.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+
+        if (file != null) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String linea;
+                int importados = 0;
+
+                while ((linea = reader.readLine()) != null) {
+                    String[] campos = linea.split(",");
+
+                    if (campos.length >= 3) {
+                        try {
+                            double monto = Double.parseDouble(campos[0].trim().replace(",", "."));
+                            LocalDate fecha = LocalDate.parse(campos[1].trim());
+                            String descripcion = campos[2].trim();
+
+                            Ingreso ingreso = new Ingreso(0, cuentaActual.getIdCuenta(),descripcion,monto,fecha);
+                            IngresoDAO.insertarIngreso(ingreso);
+                            importados++;
+                        } catch (Exception ex) {
+                            System.err.println("Error en línea: " + linea + " → " + ex.getMessage());
+                        }
+                    }
+                }
+
+                recargarTabla();
+                mostrarAlerta("Se han importado " + importados + " ingresos correctamente.");
+            } catch (IOException e) {
+                mostrarAlerta("Error al leer el archivo CSV.");
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void crearBotonesCrud() {
         crudButtonBox.getChildren().clear();
 
@@ -184,6 +238,21 @@ public class ListadoIngresosController {
                 "Añadir",
                 "Eliminar"
         };
+
+        // Añadir botón de importación CSV
+        Button btnImportar = new Button();
+        btnImportar.getStyleClass().add("user-button");
+
+        ImageView iconImport = new ImageView(new Image(getClass().getResourceAsStream(
+                "/org/example/savemate/img/importar_24x24.png")));
+        iconImport.setFitWidth(20);
+        iconImport.setFitHeight(20);
+
+        btnImportar.setGraphic(iconImport);
+        Tooltip.install(btnImportar, new Tooltip("Importar CSV"));
+        btnImportar.setOnAction(e -> importarIngresosDesdeCSV());
+
+        crudButtonBox.getChildren().add(btnImportar);
 
         for (int i = 0; i < iconos.length; i++) {
             Button btn = new Button();

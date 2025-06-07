@@ -219,6 +219,7 @@ public class MainController {
     //CargarNombreCuenta
     private void cargarCuentaDelUsuario() {
         cuentaActual = Sesion.getCuentaActual();
+        System.out.println("DEBUG: cuentaActual = " + cuentaActual);
 
         if (cuentaActual != null) {
             cuentaActual.setSaldoInicial(CuentaDAO.obtenerSaldoInicial(cuentaActual.getIdCuenta()));
@@ -230,6 +231,17 @@ public class MainController {
     //Combo box para el filtro por año
     private void configurarFiltroPorAnio() {
         int añoActual = java.time.Year.now().getValue();
+
+        if (cuentaActual == null) {
+            // Usuario sin cuenta → dejar el combo deshabilitado y mostrar un año por defecto
+            añoComboBox.getItems().clear();
+            añoComboBox.getItems().add(String.valueOf(añoActual)); // puedes poner "2025" si quieres
+            añoComboBox.setValue(String.valueOf(añoActual));
+            añoComboBox.setDisable(true); // DESHABILITAR EL COMBO
+            return;
+        }
+
+        añoComboBox.setDisable(false); // Habilitar si sí hay cuenta
 
         int minGasto = CuentaDAO.obtenerMinAñoGastos(cuentaActual.getIdCuenta());
         int maxGasto = CuentaDAO.obtenerMaxAñoGastos(cuentaActual.getIdCuenta());

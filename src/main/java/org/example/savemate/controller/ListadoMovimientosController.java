@@ -42,6 +42,11 @@ public class ListadoMovimientosController {
         initDrawerContent();
         configurarHamburger();
 
+        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/cuenta_24x24.png")));
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        userButton.setGraphic(icon);
+
         cuentaActual = Sesion.getCuentaActual();
         if (cuentaActual == null) {
             // No hay cuenta
@@ -65,11 +70,6 @@ public class ListadoMovimientosController {
         if (cuentaActual != null) {
             tituloCuenta.setText(cuentaActual.getNombre());
         }
-
-        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/org/example/savemate/img/cuenta_24x24.png")));
-        icon.setFitWidth(20);
-        icon.setFitHeight(20);
-        userButton.setGraphic(icon);
 
         colFecha.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getFecha()));
         colDescripcion.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getDescripcion()));

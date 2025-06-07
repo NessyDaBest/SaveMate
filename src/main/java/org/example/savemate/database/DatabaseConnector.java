@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseConnector {
     // Conexión usando Session Pooler (compatible con IPv4 y soporta PreparedStatement necesario para la presentacion)
-    private static final String URL = "jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:5432/postgres";
+    private static final String URL = "jdbc:postgresql://aws-0-eu-west-3.pooler.supabase.com:5432/postgres?sslmode=require&sslfactory=org.postgresql.ssl.NonValidatingFactory";
     private static final String USER = "postgres.uxpnfaobgwseqxihmcuu";
     private static final String PASSWORD = "SuyC_i8uGy88.#J";
 
